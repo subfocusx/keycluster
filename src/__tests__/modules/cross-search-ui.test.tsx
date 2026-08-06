@@ -9,6 +9,12 @@ import { CrossSearchPanel } from '@user-plugins/cross-search/components';
 import { useAppStore } from '@/plugin-sdk';
 import { createEventBus } from '@/core/event-bus';
 
+// Кнопка удаления дублей теперь требует подтверждения через kcDialog.
+vi.mock('@/components/KCDialog', () => ({
+  useKCDialog: () => ({ confirm: vi.fn().mockResolvedValue(true), prompt: vi.fn() }),
+  kcAlert: vi.fn(),
+}));
+
 function createMockCtx() {
   return {
     eventBus: { ...createEventBus(), emit: vi.fn() },

@@ -329,28 +329,30 @@ export function ImportDialog({ open, onOpenChange, ctx }: { open: boolean; onOpe
               </div>
               <div>
                 <label className="text-[13px] font-medium mb-1 block">Разделитель (для CSV/TXT)</label>
-                <select
-                  className="w-full h-8 rounded-[3px] border border-[var(--kc-border)] bg-[var(--kc-surface)] px-3 text-[12px]"
-                  value={delimiter}
-                  onChange={e => setDelimiter(e.target.value)}
-                >
-                  <option value=",">Запятая (,)</option>
-                  <option value="\t">Табуляция</option>
-                  <option value=";">Точка с запятой (;)</option>
-                </select>
+                <Select value={delimiter} onValueChange={setDelimiter}>
+                  <SelectTrigger className="w-full h-8 rounded-[3px] border border-[var(--kc-border)] bg-[var(--kc-surface)] px-3 text-[12px]" aria-label="Разделитель">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value=",">Запятая (,)</SelectItem>
+                    <SelectItem value="\t">Табуляция</SelectItem>
+                    <SelectItem value=";">Точка с запятой (;)</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <label className="text-[13px] font-medium mb-1 block">Целевая группа</label>
-                <select
-                  className="w-full h-8 rounded-[3px] border border-[var(--kc-border)] bg-[var(--kc-surface)] px-3 text-[12px]"
-                  value={targetGroupId ?? ''}
-                  onChange={e => setTargetGroupId(e.target.value || null)}
-                >
-                  <option value="">— Выберите группу —</option>
-                  {groups.map(g => (
-                    <option key={g.id} value={g.id}>{g.name}</option>
-                  ))}
-                </select>
+                <Select value={targetGroupId ?? '__none__'} onValueChange={(v) => setTargetGroupId(v === '__none__' ? null : v)}>
+                  <SelectTrigger className="w-full h-8 rounded-[3px] border border-[var(--kc-border)] bg-[var(--kc-surface)] px-3 text-[12px]" aria-label="Целевая группа">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">— Выберите группу —</SelectItem>
+                    {groups.map(g => (
+                      <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           ) : (

@@ -120,10 +120,12 @@ describe('Export Dialog', () => {
     await userEvent.click(screen.getByText('Экспорт'));
 
     expect(screen.getByText('Формат')).toBeInTheDocument();
-    expect(screen.getByText('CSV')).toBeInTheDocument();
-    expect(screen.getByText('TSV')).toBeInTheDocument();
-    expect(screen.getByText('JSON')).toBeInTheDocument();
-    expect(screen.getByText('XLSX (Excel)')).toBeInTheDocument();
+    // Radix Select рендерит опции только после открытия списка
+    await userEvent.click(screen.getByRole('combobox', { name: 'Формат экспорта' }));
+    expect(await screen.findByRole('option', { name: 'CSV' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'TSV' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'JSON' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'XLSX (Excel)' })).toBeInTheDocument();
   });
 
   it('should disable export button when no phrases', async () => {

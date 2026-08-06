@@ -24,7 +24,7 @@ export function MinusWordRow({ mw, isSelected, groupName, onToggle, onDelete }: 
       />
       <Badge
         variant={mw.isExact ? 'default' : 'secondary'}
-        className="text-[9px] px-1.5 py-0"
+        className="text-[10px] px-1.5 py-0"
         style={mw.isExact ? { backgroundColor: 'var(--kc-red)', color: 'white' } : {}}
       >
         {mw.isExact ? 'точн.' : mw.searchType === 'broad' ? 'ширк.' : 'слов.'}

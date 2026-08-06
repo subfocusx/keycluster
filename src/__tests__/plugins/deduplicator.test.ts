@@ -308,6 +308,9 @@ describe('Deduplicator Plugin — Deduplication Logic', () => {
 
   describe('cross-group deduplication', () => {
     it('should deduplicate phrases across different groups', () => {
+      // Актуальный дефолт плагина — withinGroup=true (дедуп в пределах группы),
+      // поэтому для cross-group проверки включаем глобальный режим явно.
+      useSettingsStore.getState().setModuleSetting('deduplicator', 'withinGroup', false);
       const g1 = useAppStore.getState().addGroup('Группа 1');
       const g2 = useAppStore.getState().addGroup('Группа 2');
       addPhrasesToGroup(['купить ноутбук'], g1);
@@ -348,6 +351,8 @@ describe('Deduplicator Plugin — Deduplication Logic', () => {
     });
 
     it('should keep unique phrases in different groups', () => {
+      // Глобальный режим (withinGroup=false) — cross-group дубли удаляются.
+      useSettingsStore.getState().setModuleSetting('deduplicator', 'withinGroup', false);
       const g1 = useAppStore.getState().addGroup('Группа 1');
       const g2 = useAppStore.getState().addGroup('Группа 2');
       addPhrasesToGroup(['купить ноутбук', 'купить телефон'], g1);
@@ -536,6 +541,9 @@ describe('Deduplicator Plugin — Deduplication Logic', () => {
     });
 
     it('should handle phrases from nested (hierarchical) groups', () => {
+      // Актуальный дефолт — withinGroup=true (дедуп по groupId, parent/child — разные),
+      // для глобальной проверки включаем режим явно.
+      useSettingsStore.getState().setModuleSetting('deduplicator', 'withinGroup', false);
       const parent = useAppStore.getState().addGroup('Родитель');
       const child = useAppStore.getState().addGroup('Ребёнок', parent);
       addPhrasesToGroup(['ноутбук'], parent);

@@ -4,7 +4,7 @@
 
 import type { PluginContext } from 'plugin-sdk';
 import React, { useState } from 'react';
-import { useAppStore, Button, Badge } from 'plugin-sdk';
+import { useAppStore, Button, Badge, useKCDialog } from 'plugin-sdk';
 import { findDuplicates } from './index';
 
 // ---- Icon helper ----
@@ -17,6 +17,7 @@ export function CrossSearchPanel(_props: { ctx: PluginContext }) {
   const phrases = useAppStore(s => s.phrases);
   const groups = useAppStore(s => s.groups);
   const deletePhrases = useAppStore(s => s.deletePhrases);
+  const kcDialog = useKCDialog();
 
   const [duplicates, setDuplicates] = useState<ReturnType<typeof findDuplicates> | null>(null);
 
@@ -25,7 +26,7 @@ export function CrossSearchPanel(_props: { ctx: PluginContext }) {
     setDuplicates(result);
   };
 
-  const handleRemoveDuplicates = (textKey: string) => {
+  const handleRemoveDuplicates = async (textKey: string) => {
     const entry = duplicates?.get(textKey);
     if (!entry) return;
 
@@ -33,6 +34,8 @@ export function CrossSearchPanel(_props: { ctx: PluginContext }) {
     if (matching.length <= 1) return;
 
     const toDelete = matching.slice(1).map(p => p.id);
+    const ok = await kcDialog.confirm(`Удалить ${toDelete.length} дублей?`, { title: 'Удаление дублей', confirmLabel: 'Удалить', variant: 'destructive' });
+    if (!ok) return;
     deletePhrases(toDelete);
     setDuplicates(prev => {
       if (!prev) return prev;
@@ -59,11 +62,11 @@ export function CrossSearchPanel(_props: { ctx: PluginContext }) {
                   <div key={key} className="border border-[var(--kc-border)] rounded-[3px] p-2 space-y-1">
                     <div className="flex items-center justify-between">
                       <span className="text-[12px] font-medium truncate max-w-[200px]">{entry.text}</span>
-                      <Badge variant="secondary" className="text-[9px]">{entry.count}x</Badge>
+                      <Badge variant="secondary" className="text-[10px]">{entry.count}x</Badge>
                     </div>
                     <div className="flex flex-wrap gap-1">
                       {Array.from(entry.groupIds).map(gid => (
-                        <Badge key={gid} variant="outline" className="text-[9px]">{getGroupName(gid)}</Badge>
+                        <Badge key={gid} variant="outline" className="text-[10px]">{getGroupName(gid)}</Badge>
                       ))}
                     </div>
                     <Button

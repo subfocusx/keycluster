@@ -1,7 +1,7 @@
 import type { PromptKey } from 'plugin-sdk';
 import React, { useState, useCallback } from 'react';
 import { useAIStore, promptManager } from 'plugin-sdk';
-import { Button, Input, Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from 'plugin-sdk';
+import { Button, Input, Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'plugin-sdk';
 
 function MIcon({ name, className = '' }: { name: string; className?: string }) {
   return <span className={`material-symbols-outlined ${className}`}>{name}</span>;
@@ -114,40 +114,41 @@ function PromptSection() {
         <div className="space-y-2">
           <div className="flex items-center gap-1 flex-wrap">
             <button
-              className="flex items-center gap-1 px-2 py-1 text-[9px] rounded-[3px] border border-[var(--border)] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer"
+              className="flex items-center gap-1 px-2 py-1 text-[10px] rounded-[3px] border border-[var(--border)] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer"
               onClick={() => setShowPresetDialog(true)}
             >
               <MIcon name="save" className="!text-[10px]" /> Сохранить
             </button>
             <button
-              className="flex items-center gap-1 px-2 py-1 text-[9px] rounded-[3px] border border-[var(--border)] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer"
+              className="flex items-center gap-1 px-2 py-1 text-[10px] rounded-[3px] border border-[var(--border)] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer"
               onClick={handleExport}
             >
               <MIcon name="file_download" className="!text-[10px]" /> Экспорт
             </button>
             <button
-              className="flex items-center gap-1 px-2 py-1 text-[9px] rounded-[3px] border border-[var(--border)] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer"
+              className="flex items-center gap-1 px-2 py-1 text-[10px] rounded-[3px] border border-[var(--border)] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer"
               onClick={() => setShowImportDialog(true)}
             >
               <MIcon name="file_upload" className="!text-[10px]" /> Импорт
             </button>
             <button
-              className="flex items-center gap-1 px-2 py-1 text-[9px] rounded-[3px] border border-[var(--accent-red)] text-[var(--accent-red)] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer"
+              className="flex items-center gap-1 px-2 py-1 text-[10px] rounded-[3px] border border-[var(--accent-red)] text-[var(--accent-red)] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer"
               onClick={resetAllPrompts}
             >
               <MIcon name="restart_alt" className="!text-[10px]" /> Сброс
             </button>
             {presets.length > 0 && (
-              <select
-                className="flex-1 h-6 text-[9px] rounded-[3px] border border-[var(--border)] bg-[var(--bg-surface)] px-1 text-[var(--text)]"
-                value=""
-                onChange={e => { if (e.target.value) handleLoadPreset(e.target.value); e.target.value = ''; }}
-              >
-                <option value="">Загрузить...</option>
-                {presets.map(name => (
-                  <option key={name} value={name}>{name}</option>
-                ))}
-              </select>
+              <Select value="__none__" onValueChange={(v) => { if (v !== '__none__') handleLoadPreset(v); }}>
+                <SelectTrigger className="flex-1 h-6 text-[10px] rounded-[3px] border border-[var(--border)] bg-[var(--bg-surface)] px-1 text-[var(--text)]" aria-label="Загрузить пресет">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">Загрузить...</SelectItem>
+                  {presets.map(name => (
+                    <SelectItem key={name} value={name}>{name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             )}
           </div>
 
@@ -159,18 +160,18 @@ function PromptSection() {
                   <span className="text-[10px] font-medium">{label}</span>
                 </div>
                 {editingKey !== key ? (
-                  <button className="text-[9px] text-[var(--accent-blue)] hover:underline cursor-pointer" onClick={() => startEdit(key)}>Edit</button>
+                  <button className="text-[10px] text-[var(--accent-blue)] hover:underline cursor-pointer" onClick={() => startEdit(key)}>Edit</button>
                 ) : (
                   <div className="flex items-center gap-1">
-                    <button className="text-[9px] text-[var(--text-secondary)] hover:underline cursor-pointer" onClick={cancelEdit}>Cancel</button>
-                    <button className="text-[9px] text-[var(--accent-blue)] hover:underline cursor-pointer" onClick={saveEdit}>Save</button>
+                    <button className="text-[10px] text-[var(--text-secondary)] hover:underline cursor-pointer" onClick={cancelEdit}>Cancel</button>
+                    <button className="text-[10px] text-[var(--accent-blue)] hover:underline cursor-pointer" onClick={saveEdit}>Save</button>
                   </div>
                 )}
               </div>
               {editingKey === key ? (
                 <div className="p-2 space-y-1">
                   <textarea
-                    className="w-full min-h-[80px] text-[9px] font-mono rounded-[3px] border border-[var(--border)] bg-[var(--bg-surface)] p-1.5 resize-vertical focus:outline-none focus:border-[var(--accent-blue)]"
+                    className="w-full min-h-[80px] text-[10px] font-mono rounded-[3px] border border-[var(--border)] bg-[var(--bg-surface)] p-1.5 resize-vertical focus:outline-none focus:border-[var(--accent-blue)]"
                     value={editValue}
                     onChange={e => { setEditValue(e.target.value); setValidationError(null); }}
                     style={{ fontFamily: 'JetBrains Mono, Consolas, monospace', lineHeight: '1.4' }}

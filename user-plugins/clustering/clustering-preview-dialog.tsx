@@ -47,7 +47,7 @@ export function PreviewDialog({
                       <div key={p.id} className="text-[10px] text-[var(--text-secondary)] truncate py-0.5">{p.text}</div>
                     ))}
                     {phrases.length > 10 && (
-                      <div className="text-[9px] text-[var(--text-disabled)] pt-0.5">... ещё {phrases.length - 10} фраз</div>
+                      <div className="text-[10px] text-[var(--text-disabled)] pt-0.5">... ещё {phrases.length - 10} фраз</div>
                     )}
                   </div>
                 </div>

@@ -6,7 +6,7 @@ import { useAppStore } from 'plugin-sdk';
 import { LogStore } from 'plugin-sdk';
 import { EXPORT_TEMPLATES } from './export-templates';
 import { getAllExportFormats } from 'plugin-sdk';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, Button } from 'plugin-sdk';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, Button, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'plugin-sdk';
 import { importExportSettings } from './index';
 
 function MIcon({ name, className = '' }: { name: string; className?: string }) {
@@ -88,44 +88,47 @@ export function ExportDialog({ open, onOpenChange, ctx }: { open: boolean; onOpe
         <div className="space-y-3">
           <div>
             <label className="text-[13px] font-medium mb-1 block">Шаблон</label>
-            <select
-              className="w-full h-8 rounded-[3px] border border-[var(--kc-border)] bg-[var(--kc-surface)] px-3 text-[12px]"
-              value={templateId}
-              onChange={e => setTemplateId(e.target.value)}
-            >
-              {EXPORT_TEMPLATES.map(t => (
-                <option key={t.id} value={t.id}>{t.name}</option>
-              ))}
-            </select>
+            <Select value={templateId} onValueChange={setTemplateId}>
+              <SelectTrigger className="w-full h-8 rounded-[3px] border border-[var(--kc-border)] bg-[var(--kc-surface)] px-3 text-[12px]" aria-label="Шаблон экспорта">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {EXPORT_TEMPLATES.map(t => (
+                  <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <p className="text-[10px] text-[var(--kc-text-secondary)] mt-1">{template.description}</p>
           </div>
 
           <div>
             <label className="text-[13px] font-medium mb-1 block">Формат</label>
-            <select
-              className="w-full h-8 rounded-[3px] border border-[var(--kc-border)] bg-[var(--kc-surface)] px-3 text-[12px]"
-              value={formatId}
-              onChange={e => setFormatId(e.target.value)}
-            >
-              {formats.map(f => (
-                <option key={f.id} value={f.id}>{f.label}</option>
-              ))}
-            </select>
+            <Select value={formatId} onValueChange={setFormatId}>
+              <SelectTrigger className="w-full h-8 rounded-[3px] border border-[var(--kc-border)] bg-[var(--kc-surface)] px-3 text-[12px]" aria-label="Формат экспорта">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {formats.map(f => (
+                  <SelectItem key={f.id} value={f.id}>{f.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {!template.exportMinusWords && (
             <div>
               <label className="text-[13px] font-medium mb-1 block">Группа</label>
-              <select
-                className="w-full h-8 rounded-[3px] border border-[var(--kc-border)] bg-[var(--kc-surface)] px-3 text-[12px]"
-                value={selectedGroupId}
-                onChange={e => setSelectedGroupId(e.target.value)}
-              >
-                <option value="__all__">— Все группы —</option>
-                {allGroups.map(g => (
-                  <option key={g.id} value={g.id}>{g.name}</option>
-                ))}
-              </select>
+              <Select value={selectedGroupId} onValueChange={setSelectedGroupId}>
+                <SelectTrigger className="w-full h-8 rounded-[3px] border border-[var(--kc-border)] bg-[var(--kc-surface)] px-3 text-[12px]" aria-label="Группа для экспорта">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__all__">— Все группы —</SelectItem>
+                  {allGroups.map(g => (
+                    <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           )}
 

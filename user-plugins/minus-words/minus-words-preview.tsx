@@ -28,7 +28,7 @@ export function MinusWordsPreview({ phrases, pendingRemoveIds, onToggleExclude, 
             </span>
           )}
         </span>
-        <button className="tool-btn !w-5 !h-5" onClick={onCancel} title="Закрыть предпросмотр">
+        <button className="tool-btn !w-5 !h-5" onClick={onCancel} title="Закрыть предпросмотр" aria-label="Закрыть предпросмотр">
           <MIcon name="close" className="!text-[12px]" />
         </button>
       </div>

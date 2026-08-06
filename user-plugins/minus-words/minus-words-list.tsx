@@ -1,5 +1,5 @@
-import React from 'react';
-import { Input, Button, ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger, ContextMenuSeparator } from 'plugin-sdk';
+import React, { useState } from 'react';
+import { Input, Button, ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger, ContextMenuSeparator, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'plugin-sdk';
 import { MinusWordRow } from './minus-word-row';
 import type { MinusWord, MinusWordGroup, Phrase, KCID } from 'plugin-sdk';
 function MIcon({ name, className = '' }: { name: string; className?: string }) {
@@ -44,6 +44,7 @@ export function MinusWordsList({
   editingGroupId, editingGroupName, onEditingGroupChange, onRenameGroup,
   onCopyGroup, onDeleteGroup, onToggleMw, onDeleteMw, groups,
 }: MinusWordsListProps) {
+  const [folderValue, setFolderValue] = useState('__none__');
   return (
     <div className="flex-1 overflow-y-auto compact-scroll p-3 pt-1 space-y-2">
       <div className="relative">
@@ -65,23 +66,27 @@ export function MinusWordsList({
           {selectedMwIds.size > 0 && (
             <>
               <span className="text-[11px] text-[var(--kc-blue)] font-medium tabular-nums">{selectedMwIds.size}</span>
-              <select
-                className="h-5 rounded-[3px] border border-[var(--kc-border)] bg-[var(--kc-surface)] text-[10px] w-auto max-w-[90px]"
-                defaultValue=""
-                onChange={e => { if (e.target.value) { moveSelectedToGroup(e.target.value === '__none__' ? null : e.target.value); e.target.value = ''; } }}
+              <Select
+                value={folderValue}
+                onValueChange={(v) => { if (v !== '__none__') moveSelectedToGroup(v === '__none2__' ? null : v); setFolderValue('__none__'); }}
               >
-                <option value="" disabled>в папку...</option>
-                <option value="__none__">Без папки</option>
-                {minusWordGroups.map(g => (
-                  <option key={g.id} value={g.id}>{g.name}</option>
-                ))}
-              </select>
-              <button className="tool-btn !w-5 !h-5" style={{ color: 'var(--kc-red)' }} onClick={handleBulkDelete} title="Удалить выбранные">
+                <SelectTrigger className="h-5 rounded-[3px] border border-[var(--kc-border)] bg-[var(--kc-surface)] text-[10px] w-auto max-w-[90px]" aria-label="Переместить в папку">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__" disabled>в папку...</SelectItem>
+                  <SelectItem value="__none2__">Без папки</SelectItem>
+                  {minusWordGroups.map(g => (
+                    <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <button className="tool-btn !w-5 !h-5" style={{ color: 'var(--kc-red)' }} onClick={handleBulkDelete} title="Удалить выбранные" aria-label="Удалить выбранные">
                 <MIcon name="delete" className="!text-[14px]" />
               </button>
             </>
           )}
-          <button className="tool-btn !w-5 !h-5" onClick={onToggleSelectAll} title={allSelected ? 'Снять выделение' : 'Выбрать все'} disabled={minusWords.length === 0}>
+          <button className="tool-btn !w-5 !h-5" onClick={onToggleSelectAll} title={allSelected ? 'Снять выделение' : 'Выбрать все'} aria-label={allSelected ? 'Снять выделение' : 'Выбрать все'} disabled={minusWords.length === 0}>
             <MIcon name={allSelected ? 'deselect' : 'select_all'} className="!text-[14px]" />
           </button>
           <span className="text-[12px] font-semibold ml-1">{filteredCount}</span>

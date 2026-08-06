@@ -971,6 +971,7 @@ export default function SeoMultitoolPanel(props: PanelProps) {
               style={{ background: 'var(--bg-surface)', color: 'var(--text-primary)', border: '1px solid var(--border)' }}
               value={selectedGroupId}
               onChange={(e) => setSelectedGroupId(e.target.value)}
+              aria-label="Выберите группу"
             >
               <option value="">-- Выберите группу --</option>
               {groups?.map((g: any) => (

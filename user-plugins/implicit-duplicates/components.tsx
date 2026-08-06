@@ -66,10 +66,10 @@ function DuplicateGroupCard({
             {group.mainPhrase.text}
           </span>
         </div>
-        <Badge variant="outline" className="text-[9px] px-1.5 py-0 bg-blue-50 text-blue-700 border-blue-200 shrink-0">
+        <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-blue-50 text-blue-700 border-blue-200 shrink-0">
           {group.phrases.length} фраз
         </Badge>
-        <Badge variant="outline" className="text-[9px] px-1.5 py-0 bg-green-50 text-green-700 border-green-200 shrink-0">
+        <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-green-50 text-green-700 border-green-200 shrink-0">
           {Math.round(group.avgSimilarity * 100)}%
         </Badge>
         {/* Select all duplicates in group */}
@@ -306,7 +306,7 @@ export function ImplicitDuplicatesPanel(_props?: { ctx?: PluginContext }) {
                 onValueChange={v => setThreshold(v[0])}
                 className="mt-2"
               />
-              <div className="flex justify-between text-[9px] text-[var(--kc-text-disabled)] mt-1">
+              <div className="flex justify-between text-[10px] text-[var(--kc-text-disabled)] mt-1">
                 <span>30% (больше дублей)</span>
                 <span>100% (точное совпадение)</span>
               </div>

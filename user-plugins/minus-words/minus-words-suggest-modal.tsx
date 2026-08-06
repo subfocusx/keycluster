@@ -19,7 +19,7 @@ export function MinusWordsSuggestModal({ results, isWordAdded, onAddWord, onAddA
       <div className="w-[450px] max-h-[70vh] flex flex-col rounded-[6px] shadow-lg border" style={{ backgroundColor: 'var(--kc-surface)', borderColor: 'var(--kc-border)' }} onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between px-3 py-2 border-b shrink-0" style={{ borderColor: 'var(--kc-border-light)' }}>
           <span className="text-[12px] font-semibold">Подобранные минус-слова</span>
-          <button className="tool-btn !w-5 !h-5" onClick={onClose}>
+          <button className="tool-btn !w-5 !h-5" onClick={onClose} aria-label="Закрыть">
             <MIcon name="close" className="!text-[12px]" />
           </button>
         </div>
@@ -34,7 +34,7 @@ export function MinusWordsSuggestModal({ results, isWordAdded, onAddWord, onAddA
                   onCheckedChange={() => onAddWord(r.word)}
                 />
                 <span className={`flex-1 truncate ${exists ? 'text-[var(--kc-text-disabled)] line-through' : ''}`}>{r.word}</span>
-                <span className="text-[9px] px-1 rounded" style={{ backgroundColor: r.source === 'dictionary' ? 'var(--kc-blue-light)' : 'var(--kc-surface-hover)' }}>
+                <span className="text-[10px] px-1 rounded" style={{ backgroundColor: r.source === 'dictionary' ? 'var(--kc-blue-light)' : 'var(--kc-surface-hover)' }}>
                   {r.source}
                 </span>
                 <span className="text-[10px] text-[var(--kc-text-secondary)]">{(r.confidence * 100).toFixed(0)}%</span>

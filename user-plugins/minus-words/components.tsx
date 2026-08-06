@@ -3,7 +3,7 @@ import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import type { Group } from 'plugin-sdk';
 import { useAppStore , AppEvents} from 'plugin-sdk';
 import type { PluginContext, MinusWord, MinusWordGroup, Phrase, KCID } from 'plugin-sdk';
-import { Button, Input, Checkbox, useKCDialog, toast } from 'plugin-sdk';
+import { Button, Input, Checkbox, useKCDialog, toast, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'plugin-sdk';
 import { suggestMinusWords } from 'plugin-sdk';
 import { matchPhrases } from './minus-words-matcher';
 import { scopedMinusWords } from './minus-words-scope';
@@ -104,7 +104,10 @@ export function MinusWordsPanel({ ctx }: { ctx: PluginContext }) {
     removeMinusWord(id);
   };
 
-  const handleBulkDelete = () => {
+  const handleBulkDelete = async () => {
+    if (selectedMwIds.size === 0) return;
+    const ok = await kcDialog.confirm(`Удалить ${selectedMwIds.size} минус-фраз?`, { title: 'Удаление', confirmLabel: 'Удалить', variant: 'destructive' });
+    if (!ok) return;
     for (const id of selectedMwIds) removeMinusWord(id);
     setSelectedMwIds(new Set());
   };
@@ -325,18 +328,26 @@ export function MinusWordsPanel({ ctx }: { ctx: PluginContext }) {
             <Checkbox checked={isExact} onCheckedChange={v => setIsExact(!!v)} />
             Точная фраза
           </label>
-          <select className="h-6 rounded-[3px] border border-[var(--kc-border)] bg-[var(--kc-surface)] px-2 text-[11px]"
-            value={searchType} onChange={e => setSearchType(e.target.value as MinusWord['searchType'])}>
-            <option value="broad">Широкий поиск</option>
-            <option value="broad_modified">По словам</option>
-            <option value="exact">Точное совпадение</option>
-          </select>
+          <Select value={searchType} onValueChange={(v) => setSearchType(v as MinusWord['searchType'])}>
+            <SelectTrigger className="h-6 rounded-[3px] border border-[var(--kc-border)] bg-[var(--kc-surface)] px-2 text-[11px]" aria-label="Тип поиска">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="broad">Широкий поиск</SelectItem>
+              <SelectItem value="broad_modified">По словам</SelectItem>
+              <SelectItem value="exact">Точное совпадение</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-        <select className="w-full h-6 rounded-[3px] border border-[var(--kc-border)] bg-[var(--kc-surface)] px-2 text-[11px]"
-          value={targetGroupId ?? 'global'} onChange={e => setTargetGroupId(e.target.value === 'global' ? null : e.target.value)}>
-          <option value="global">Глобально (все группы)</option>
-          {groups.filter(g => !g.isTrash).map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
-        </select>
+        <Select value={targetGroupId ?? 'global'} onValueChange={(v) => setTargetGroupId(v === 'global' ? null : v)}>
+          <SelectTrigger className="w-full h-6 rounded-[3px] border border-[var(--kc-border)] bg-[var(--kc-surface)] px-2 text-[11px]" aria-label="Группа применения">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="global">Глобально (все группы)</SelectItem>
+            {groups.filter(g => !g.isTrash).map(g => <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>)}
+          </SelectContent>
+        </Select>
       </div>
       <div className="h-px bg-[var(--kc-border-light)] mx-3" />
       <div className="flex items-center gap-1 px-3 pt-2">

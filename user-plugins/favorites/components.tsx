@@ -19,6 +19,7 @@ export function FavoritesToolbarButton({ groupId, ctx }: { groupId: KCID | null;
     <button
       className="tool-btn !w-7 !h-7"
       title={active ? 'Показать все фразы' : 'Только избранное'}
+      aria-label={active ? 'Показать все фразы' : 'Только избранное'}
       onClick={handleToggle}
       style={active ? { color: 'var(--kc-yellow)' } : {}}
     >

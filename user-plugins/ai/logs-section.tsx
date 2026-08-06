@@ -27,6 +27,7 @@ function LogsSection() {
           <button
             className="tool-btn !w-5 !h-5"
             title="Скопировать логи"
+            aria-label="Скопировать логи"
             onClick={() => {
               const text = logs.map(l => `${new Date(l.timestamp).toLocaleString()} [${l.level.toUpperCase()}] ${l.message}${l.duration ? ` (${l.duration}ms)` : ''}`).join('\n');
               navigator.clipboard.writeText(text);
@@ -35,7 +36,7 @@ function LogsSection() {
           >
             <MIcon name="content_copy" className="!text-[12px]" />
           </button>
-          <button className="tool-btn !w-5 !h-5" title="Очистить логи" onClick={clearLogs}>
+          <button className="tool-btn !w-5 !h-5" title="Очистить логи" aria-label="Очистить логи" onClick={clearLogs}>
             <MIcon name="delete" className="!text-[12px]" />
           </button>
         </div>

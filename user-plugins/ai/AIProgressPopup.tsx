@@ -76,7 +76,7 @@ function AIProgressPopup() {
       >
         <span className="material-symbols-outlined !text-[12px]" style={{ color: statusColor }}>auto_awesome</span>
         <span className="text-[10px] font-medium" style={{ color: statusColor }}>{active.label}</span>
-        <span className="text-[9px] tabular-nums" style={{ color: statusColor }}>{active.progress}%</span>
+        <span className="text-[10px] tabular-nums" style={{ color: statusColor }}>{active.progress}%</span>
       </div>
     );
   }
@@ -92,7 +92,7 @@ function AIProgressPopup() {
           <div className="min-w-0">
             <div className="text-[11px] font-medium truncate">{active.label}</div>
             {active.status === 'processing' && startTimeRef.current && (
-              <div className="text-[9px] text-[var(--kc-text-secondary)]">{formatElapsed(elapsed)}</div>
+              <div className="text-[10px] text-[var(--kc-text-secondary)]">{formatElapsed(elapsed)}</div>
             )}
           </div>
         </div>
@@ -119,12 +119,12 @@ function AIProgressPopup() {
             style={{ width: `${active.progress}%`, backgroundColor: statusColor }}
           />
         </div>
-        <div className="flex items-center justify-between text-[9px] text-[var(--kc-text-secondary)] tabular-nums">
+        <div className="flex items-center justify-between text-[10px] text-[var(--kc-text-secondary)] tabular-nums">
           <span>{active.progress}%</span>
           <span>Batch {active.processed}/{active.total}</span>
           {startTimeRef.current && <span>{formatElapsed(elapsed)}</span>}
         </div>
-        <div className="text-[9px] text-[var(--kc-text-secondary)]">
+        <div className="text-[10px] text-[var(--kc-text-secondary)]">
           {active.status === 'processing' && 'Processing...'}
           {active.status === 'completed' && 'Completed'}
           {active.status === 'cancelled' && 'Cancelled'}
@@ -136,7 +136,7 @@ function AIProgressPopup() {
       {active.status === 'processing' && (
         <div className="px-3 py-1.5 border-t flex justify-end" style={{ borderColor: 'var(--kc-border-light)' }}>
           <button
-            className="px-3 py-0.5 text-[9px] font-medium rounded-[3px] border transition-colors cursor-pointer hover:bg-[var(--kc-red-light)]"
+            className="px-3 py-0.5 text-[10px] font-medium rounded-[3px] border transition-colors cursor-pointer hover:bg-[var(--kc-red-light)]"
             style={{ borderColor: 'var(--kc-red)', color: 'var(--kc-red)' }}
             onClick={handleStop}
           >
