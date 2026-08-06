@@ -12,12 +12,10 @@ import { pluginRegistry } from '@/plugin-sdk';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { ModuleErrorBoundary } from '@/components/ModuleErrorBoundary';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { MIcon } from '@/shell/shared-icon';
 
 // ---- Icon helper ----
 
-function MIcon({ name, className = '', style }: { name: string; className?: string; style?: React.CSSProperties }) {
-  return <span className={`material-symbols-outlined ${className}`} style={style}>{name}</span>;
-}
 
 // ---- Help texts for each module ----
 

@@ -7,6 +7,13 @@ import { PluginRibbonButtons } from './PluginRibbonButtons';
 import { useKCDialog } from '@/components/KCDialog';
 import { SlotRenderer } from '@/shell/SlotRenderer';
 import { clearCurrentProject } from '@/core/project-service';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
 
 export interface TabRibbonContext {
   ctx: any;
@@ -14,7 +21,7 @@ export interface TabRibbonContext {
   onToolOpen: (id: string) => void;
   onSettingsOpen: () => void;
   onProjectOpen: () => void;
-  onThemeChange: () => void;
+  onThemeChange: (theme: 'light' | 'dark' | 'dark-pro') => void;
   onRefresh: () => void;
   allTabs: CustomTab[];
   overrides: Record<string, string>;
@@ -153,10 +160,11 @@ function PluginRibbonGroup(props: {
 
 function ViewActionsGroup({ onRefresh, onThemeChange, onSettingsOpen }: {
   onRefresh: () => void;
-  onThemeChange: () => void;
+  onThemeChange: (theme: 'light' | 'dark' | 'dark-pro') => void;
   onSettingsOpen: () => void;
 }) {
   const theme = useAppStore(s => s.ui.theme);
+  const themeLabel = theme === 'dark-pro' ? 'Dark Pro' : theme === 'dark' ? 'Тёмная' : 'Светлая';
 
   return (
     <>
@@ -168,12 +176,25 @@ function ViewActionsGroup({ onRefresh, onThemeChange, onSettingsOpen }: {
       </div>
       <div className="ribbon-sep" />
       <div className="flex items-center gap-0.5">
-        <button className="ribbon-btn" title="Сменить тему" onClick={onThemeChange}>
-          <MIcon name={theme === 'dark' || theme === 'dark-pro' ? 'light_mode' : 'dark_mode'} className="ribbon-icon" />
-          <span className="ribbon-label">
-            {theme === 'dark-pro' ? 'Dark Pro' : theme === 'dark' ? 'Тёмная' : 'Светлая'}
-          </span>
-        </button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="ribbon-btn" title="Выбрать тему">
+              <MIcon name={theme === 'dark' || theme === 'dark-pro' ? 'light_mode' : 'dark_mode'} className="ribbon-icon" />
+              <span className="ribbon-label">{themeLabel}</span>
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="text-[12px] min-w-[160px]" side="bottom" align="start">
+            <DropdownMenuItem onClick={() => onThemeChange('light')} className={theme === 'light' ? 'bg-[var(--kc-blue-light)]' : ''}>
+              <MIcon name="light_mode" className="!text-[14px] mr-2" /> Светлая
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onThemeChange('dark')} className={theme === 'dark' ? 'bg-[var(--kc-blue-light)]' : ''}>
+              <MIcon name="dark_mode" className="!text-[14px] mr-2" /> Тёмная
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onThemeChange('dark-pro')} className={theme === 'dark-pro' ? 'bg-[var(--kc-blue-light)]' : ''}>
+              <MIcon name="contrast" className="!text-[14px] mr-2" /> Dark Pro
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
       <div className="ribbon-sep" />
       <div className="flex items-center gap-0.5">

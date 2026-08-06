@@ -5,11 +5,9 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useAppStore, getRuntime } from '@/plugin-sdk';
 import { getEventBus } from '@/plugin-sdk';
 import { ModuleErrorBoundary } from '@/components/ModuleErrorBoundary';
+import { MIcon } from '@/shell/shared-icon';
 
 
-function MIcon({ name, className = '', style }: { name: string; className?: string; style?: React.CSSProperties }) {
-  return <span className={`material-symbols-outlined ${className}`} style={style}>{name}</span>;
-}
 
 
 

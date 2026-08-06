@@ -41,12 +41,10 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { MIcon } from '@/shell/shared-icon';
 
 // ---- Icon helper ----
 
-function MIcon({ name, className = '' }: { name: string; className?: string }) {
-  return <span className={`material-symbols-outlined ${className}`}>{name}</span>;
-}
 
 // ---- Types ----
 

@@ -12,12 +12,10 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useKCDialog } from '@/components/KCDialog';
+import { MIcon } from '@/shell/shared-icon';
 
 // ---- Icon helper (shared with ToolModal) ----
 
-function MIcon({ name, className = '', style }: { name: string; className?: string; style?: React.CSSProperties }) {
-  return <span className={`material-symbols-outlined ${className}`} style={style}>{name}</span>;
-}
 
 // ---- Trash Modal ----
 

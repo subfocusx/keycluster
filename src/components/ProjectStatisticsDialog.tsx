@@ -10,10 +10,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { MIcon } from '@/shell/shared-icon';
 
-function MIcon({ name, className = '', style }: { name: string; className?: string; style?: React.CSSProperties }) {
-  return <span className={`material-symbols-outlined ${className}`} style={style}>{name}</span>;
-}
 
 function StatRow({ label, value }: { label: string; value: string | number }) {
   return (

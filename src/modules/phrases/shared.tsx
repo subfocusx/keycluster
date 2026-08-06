@@ -5,9 +5,7 @@
 import React from 'react';
 import { useSyncExternalStore } from 'react';
 import { labelRegistry } from '@/plugin-sdk';
-function MIcon({ name, className = '', style }: { name: string; className?: string; style?: React.CSSProperties }) {
-  return <span className={`material-symbols-outlined ${className}`} style={style}>{name}</span>;
-}
+import { MIcon } from '@/shell/shared-icon';
 
 // ---- Dynamic color labels from registry ----
 

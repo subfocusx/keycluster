@@ -20,6 +20,7 @@ import CommandPalette from '@/components/CommandPalette';
 import SettingsModal from '@/components/SettingsModal';
 import { ProjectManagerDialog } from '@/components/ProjectManagerDialog';
 import { ModuleErrorBoundary } from '@/components/ModuleErrorBoundary';
+import { useKCDialog } from '@/components/KCDialog';
 import { ShellLayout, ShellLoadingScreen } from './ShellLayout';
 import { TabRouter } from './TabRouter';
 import { PanelManager, ResizablePanel, StatusBar } from './PanelManager';
@@ -41,6 +42,7 @@ export default function KeyClusterShell() {
   const [projectManagerOpen, setProjectManagerOpen] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const ctx = useModuleCtx();
+  const kcDialog = useKCDialog();
   const setTheme = useAppStore(s => s.setTheme);
   const { setTheme: setNextTheme, theme: nextTheme } = useTheme();
 
@@ -53,14 +55,10 @@ export default function KeyClusterShell() {
     document.documentElement.classList.toggle('dark', isDarkTheme(savedTheme));
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const cycleTheme = useCallback(() => {
-    const currentTheme = useAppStore.getState().ui.theme;
-    const order: Array<'light' | 'dark' | 'dark-pro'> = ['light', 'dark', 'dark-pro'];
-    const idx = order.indexOf(currentTheme as any);
-    const next = order[(idx + 1) % order.length];
-    setTheme(next);
-    setNextTheme(next);
-    document.documentElement.classList.toggle('dark', isDarkTheme(next));
+  const setThemeExplicit = useCallback((theme: 'light' | 'dark' | 'dark-pro') => {
+    setTheme(theme);
+    setNextTheme(theme);
+    document.documentElement.classList.toggle('dark', isDarkTheme(theme));
   }, [setTheme, setNextTheme]);
 
   // Global keybinding handler — delegates to KeybindingManager
@@ -68,6 +66,12 @@ export default function KeyClusterShell() {
     const handler = (e: KeyboardEvent) => {
       // Special case: Ctrl+K toggles Command Palette (not a module command)
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        setPaletteOpen(prev => !prev);
+        return;
+      }
+      // Ctrl+/ — справка по хоткеям (открывает палитру команд)
+      if ((e.ctrlKey || e.metaKey) && e.key === '/') {
         e.preventDefault();
         setPaletteOpen(prev => !prev);
         return;
@@ -94,13 +98,14 @@ export default function KeyClusterShell() {
           return;
         }
       }
-      // Delete — move selected to trash
+      // Delete — move selected to trash (with confirmation)
       if (e.key === 'Delete') {
         if (!['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement).tagName)) {
           const ids = [...useAppStore.getState().selectedPhraseIds];
           if (ids.length > 0) {
             e.preventDefault();
-            useAppStore.getState().moveToTrash(ids);
+            kcDialog.confirm(`Удалить ${ids.length} фраз?`, { title: 'Удаление', confirmLabel: 'Удалить', variant: 'destructive' })
+              .then(ok => { if (ok) useAppStore.getState().moveToTrash(ids); });
             return;
           }
         }
@@ -110,7 +115,7 @@ export default function KeyClusterShell() {
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, []);
+  }, [kcDialog]);
 
   const modulesLoading = useAppStore(s => s.ui.modulesLoading);
 const [layoutContribs, setLayoutContribs] = useState<ModuleUIContribution[]>([]);
@@ -161,7 +166,7 @@ const [panelContribs, setPanelContribs] = useState<ModuleUIContribution[]>([]);
           onToolOpen={(id) => setToolModal(id)}
           onSettingsOpen={() => setSettingsOpen(true)}
           onProjectOpen={() => setProjectManagerOpen(true)}
-          onThemeChange={cycleTheme}
+          onThemeChange={setThemeExplicit}
           onRefresh={() => {
             const s = useAppStore.getState();
             s.clearPhraseSelection();
@@ -169,7 +174,6 @@ const [panelContribs, setPanelContribs] = useState<ModuleUIContribution[]>([]);
           }}
         />
       }
-      ribbon={null}
       mainContent={(() => {
         const mainContentNode = (
           <div className="flex-1 flex min-h-0 relative">

@@ -1,10 +1,8 @@
 import { relaunch } from '@tauri-apps/plugin-process';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { MIcon } from '@/shell/shared-icon';
 
-function MIcon({ name, className = '' }: { name: string; className?: string }) {
-  return <span className={`material-symbols-outlined ${className}`}>{name}</span>;
-}
 
 export function InstallResultBanner({ pluginId }: { pluginId: string }) {
   const [relaunchError, setRelaunchError] = useState(false);

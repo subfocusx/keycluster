@@ -6,10 +6,8 @@ import { Button } from '@/components/ui/button';
 import type { PluginContext } from '@/plugin-sdk';
 import { AppEvents } from '@/plugin-sdk';
 import { AddGroupListDialog } from './dialogs';
+import { MIcon } from '@/shell/shared-icon';
 
-function MIcon({ name, className = '' }: { name: string; className?: string }) {
-  return <span className={`material-symbols-outlined ${className}`}>{name}</span>;
-}
 
 export function GroupsRibbonButtons({ ctx }: { ctx: PluginContext }) {
   const [showListDialog, setShowListDialog] = useState(false);

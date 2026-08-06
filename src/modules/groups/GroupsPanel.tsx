@@ -27,10 +27,7 @@ import { GroupsToolbar } from './groups-toolbar';
 import { GroupsFilterBar } from './groups-filter';
 import { getRuntime } from '@/plugin-sdk';
 import { useRuntimeEvents } from '@/shell/useRuntimeEvents';
-
-function MIcon({ name, className = '', style }: { name: string; className?: string; style?: React.CSSProperties }) {
-  return <span className={`material-symbols-outlined ${className}`} style={style}>{name}</span>;
-}
+import { MIcon } from '@/shell/shared-icon';
 
 export function GroupsPanel({ ctx }: { ctx: PluginContext }) {
   const groups = useAppStore(s => s.groups);
@@ -277,6 +274,7 @@ export function GroupsPanel({ ctx }: { ctx: PluginContext }) {
           <button
             className="tool-btn !w-6 !h-6"
             title="Свернуть все"
+            aria-label="Свернуть все"
             onClick={() => setAllExpanded(false)}
           >
             <MIcon name="unfold_less" className="!text-[14px]" />
@@ -284,6 +282,7 @@ export function GroupsPanel({ ctx }: { ctx: PluginContext }) {
           <button
             className="tool-btn !w-6 !h-6"
             title="Развернуть все"
+            aria-label="Развернуть все"
             onClick={() => setAllExpanded(true)}
           >
             <MIcon name="unfold_more" className="!text-[14px]" />
@@ -352,7 +351,15 @@ export function GroupsPanel({ ctx }: { ctx: PluginContext }) {
             {rootGroups.map(g => renderSubtree(g, 0))}
 
             {orphanCount > 0 && (
-              <div className="tree-item">
+              <div
+                className="tree-item cursor-pointer"
+                title={`Показать все фразы (${orphanCount} без группы)`}
+                onClick={() => {
+                  setActiveGroup(null);
+                  if (multigroupMode) setMultigroupMode(false);
+                  if (selectedGroupIds.size > 0) clearGroupSelection();
+                }}
+              >
                 <span style={{ width: '16px', flexShrink: 0 }} />
                 <MIcon name="lan" className="tree-icon" style={{ color: 'var(--accent-orange)' }} />
                 <span style={{ flex: 1, fontSize: '12px', fontWeight: 400 }}>Несгруппированные</span>

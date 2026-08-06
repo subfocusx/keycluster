@@ -15,8 +15,6 @@ import { MIcon } from '@/shell/shared-icon';
 export interface ShellLayoutProps {
   /** Tab bar section (TabBar component) */
   tabBar: React.ReactNode;
-  /** Ribbon toolbar section (RibbonToolbar component) */
-  ribbon: React.ReactNode;
   /** Main content area (PhrasesTable + right panel) */
   mainContent: React.ReactNode;
   /** Status bar section */
@@ -29,7 +27,6 @@ export interface ShellLayoutProps {
 
 export function ShellLayout({
   tabBar,
-  ribbon,
   mainContent,
   statusBar,
   overlays,
@@ -38,9 +35,6 @@ export function ShellLayout({
     <div className="h-screen flex flex-col bg-[var(--bg-base)] text-[var(--text-primary)] overflow-hidden">
       {/* Tab bar */}
       {tabBar}
-
-      {/* Ribbon toolbar */}
-      {ribbon}
 
       {/* Main content area */}
       {mainContent}

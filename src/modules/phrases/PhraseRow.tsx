@@ -24,7 +24,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { MIcon } from '@/shell/shared-icon';
 import { AppEvents } from '@/plugin-sdk';
 
-const ROW_HEIGHT = 25;
+const ROW_HEIGHT = 28;
 const OVERSCAN = 10;
 
 interface VirtualizedRowsProps {

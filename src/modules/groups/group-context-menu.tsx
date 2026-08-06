@@ -14,10 +14,8 @@ import {
   ContextMenuSeparator,
 } from '@/components/ui/context-menu';
 import { ColorPickerSubmenu } from './color-picker-submenu';
+import { MIcon } from '@/shell/shared-icon';
 
-function MIcon({ name, className = '', style }: { name: string; className?: string; style?: React.CSSProperties }) {
-  return <span className={`material-symbols-outlined ${className}`} style={style}>{name}</span>;
-}
 
 type KCDialogHandle = {
   prompt: (message: string, options?: any) => Promise<string | null>;

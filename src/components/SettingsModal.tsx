@@ -17,12 +17,10 @@ import { PluginManagerSection } from './PluginManager';
 import { useAppStore, getRuntime } from '@/plugin-sdk';
 import { getEventBus } from '@/plugin-sdk';
 import { ModuleErrorBoundary } from './ModuleErrorBoundary';
+import { MIcon } from '@/shell/shared-icon';
 
 // ---- Icon helper ----
 
-function MIcon({ name, className = '' }: { name: string; className?: string }) {
-  return <span className={`material-symbols-outlined ${className}`}>{name}</span>;
-}
 
 // ---- Sections ----
 

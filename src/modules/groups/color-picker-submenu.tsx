@@ -7,10 +7,8 @@ import {
   ContextMenuSubContent,
   ContextMenuSubTrigger,
 } from '@/components/ui/context-menu';
+import { MIcon } from '@/shell/shared-icon';
 
-function MIcon({ name, className = '', style }: { name: string; className?: string; style?: React.CSSProperties }) {
-  return <span className={`material-symbols-outlined ${className}`} style={style}>{name}</span>;
-}
 
 export const GROUP_COLORS = [
   { value: '#4A90D9', label: 'Синий' },

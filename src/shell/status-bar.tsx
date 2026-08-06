@@ -7,10 +7,7 @@ import type { ModuleUIContribution } from '@/plugin-sdk';
 import { SaveStatusIndicator } from '@/components/SaveStatusIndicator';
 import { ProjectStatisticsDialog } from '@/components/ProjectStatisticsDialog';
 import { ModuleErrorBoundary } from '@/components/ModuleErrorBoundary';
-
-function MIcon({ name, className = '', style }: { name: string; className?: string; style?: React.CSSProperties }) {
-  return <span className={`material-symbols-outlined ${className}`} style={style}>{name}</span>;
-}
+import { MIcon } from '@/shell/shared-icon';
 
 export function StatusBar({ onTrashOpen }: { onTrashOpen: () => void }) {
   const [statsOpen, setStatsOpen] = useState(false);
@@ -53,12 +50,13 @@ export function StatusBar({ onTrashOpen }: { onTrashOpen: () => void }) {
 
   return (
     <>
-    <div className="flex items-center gap-3 px-3 h-[22px] bg-[var(--statusbar-bg)] text-[var(--statusbar-text)] shrink-0 text-[11px] select-none">
+    <div className="flex items-center gap-3 px-3 h-[26px] bg-[var(--statusbar-bg)] text-[var(--statusbar-text)] shrink-0 text-[12px] select-none">
       <div className="flex items-center gap-2">
         <button
           className="flex items-center gap-1 hover:opacity-100 opacity-90 cursor-pointer"
           onClick={() => setStatsOpen(true)}
           title="Статистика проекта"
+          aria-label="Статистика проекта"
         >
           <MIcon name="bar_chart" className="!text-[12px]" />
           {phraseCount} фраз
@@ -83,7 +81,7 @@ export function StatusBar({ onTrashOpen }: { onTrashOpen: () => void }) {
         )}
       </div>
 
-      <div className="flex-1 flex items-center justify-center text-[11px]" />
+      <div className="flex-1 flex items-center justify-center text-[12px]" />
 
       <div className="ml-auto flex items-center gap-2">
         <button
@@ -91,6 +89,7 @@ export function StatusBar({ onTrashOpen }: { onTrashOpen: () => void }) {
           style={{ opacity: trashCount > 0 ? 1 : 0.6 }}
           onClick={onTrashOpen}
           title={trashCount > 0 ? `Корзина: ${trashCount} фраз` : 'Корзина пуста'}
+          aria-label={trashCount > 0 ? `Корзина: ${trashCount} фраз` : 'Корзина пуста'}
         >
           <MIcon name="delete" className="!text-[12px]" style={{ color: trashCount > 0 ? 'var(--accent-red)' : undefined }} />
           {trashCount > 0 && <span>{trashCount}</span>}
@@ -99,7 +98,10 @@ export function StatusBar({ onTrashOpen }: { onTrashOpen: () => void }) {
         {activeGroup && !activeGroup.isTrash && (
           <span className="opacity-80">{activeGroup.name}</span>
         )}
-        <div className="status-progress">
+        <div
+          className="status-progress"
+          title={`Доля фраз активной группы: ${groups.length > 0 ? Math.min(100, Math.round((phraseCount / (phrases.length || 1)) * 100)) : 0}%`}
+        >
           <div
             className="status-progress-bar"
             style={{ width: `${groups.length > 0 ? Math.min(100, (phraseCount / (phrases.length || 1)) * 100) : 0}%` }}
@@ -115,10 +117,26 @@ export function StatusBar({ onTrashOpen }: { onTrashOpen: () => void }) {
         })}
         <SaveStatusIndicator />
         {(undoCount > 0 || redoCount > 0) && (
-          <span className="text-[10px] tabular-nums flex items-center gap-1 opacity-80">
-            {undoCount > 0 && <span>↩ {undoCount}</span>}
+          <span className="text-[11px] tabular-nums flex items-center gap-1">
+            <button
+              className="flex items-center gap-0.5 hover:opacity-100 opacity-90 cursor-pointer disabled:opacity-40 disabled:cursor-default"
+              disabled={undoCount === 0}
+              onClick={() => useAppStore.getState().undo()}
+              title={`Отменить (${undoCount})`}
+              aria-label={`Отменить (${undoCount})`}
+            >
+              ↩ {undoCount}
+            </button>
             {undoCount > 0 && redoCount > 0 && <span className="opacity-40">|</span>}
-            {redoCount > 0 && <span>↪ {redoCount}</span>}
+            <button
+              className="flex items-center gap-0.5 hover:opacity-100 opacity-90 cursor-pointer disabled:opacity-40 disabled:cursor-default"
+              disabled={redoCount === 0}
+              onClick={() => useAppStore.getState().redo()}
+              title={`Повторить (${redoCount})`}
+              aria-label={`Повторить (${redoCount})`}
+            >
+              ↪ {redoCount}
+            </button>
           </span>
         )}
         {clusteringResults && clusteringResults.size > 0 && (
@@ -127,6 +145,7 @@ export function StatusBar({ onTrashOpen }: { onTrashOpen: () => void }) {
             style={{ color: 'var(--accent-blue)' }}
             onClick={applyClusteringResults}
             title={`Применить ${clusteringResults.size} кластеров`}
+            aria-label={`Применить ${clusteringResults.size} кластеров`}
           >
             <MIcon name="hub" className="!text-[12px]" />
             Создать структуру ({clusteringResults.size})

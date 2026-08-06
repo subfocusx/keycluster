@@ -239,6 +239,12 @@ export default function CommandPalette({ open, onClose }: CommandPaletteProps) {
             <kbd className="px-1 border border-[var(--kc-border)] rounded text-[10px]">Esc</kbd>
             закрыть
           </span>
+          <span className="flex items-center gap-1 ml-auto">
+            <kbd className="px-1 border border-[var(--kc-border)] rounded text-[10px]">F2</kbd>правка
+            <kbd className="px-1 border border-[var(--kc-border)] rounded text-[10px]">Ctrl+A</kbd>всё
+            <kbd className="px-1 border border-[var(--kc-border)] rounded text-[10px]">Del</kbd>корзина
+            <kbd className="px-1 border border-[var(--kc-border)] rounded text-[10px]">Ctrl+Z</kbd>отмена
+          </span>
         </div>
       </div>
     </div>

@@ -8,10 +8,8 @@ import React, { useState, useCallback } from 'react';
 import { useAppStore , AppEvents} from '@/plugin-sdk';
 import type { Group, Phrase, PluginContext } from '@/plugin-sdk';
 import { toast } from '@/hooks/use-toast';
+import { MIcon } from '@/shell/shared-icon';
 
-function MIcon({ name, className = '', style }: { name: string; className?: string; style?: React.CSSProperties }) {
-  return <span className={`material-symbols-outlined ${className}`} style={style}>{name}</span>;
-}
 
 // ---- Group Notes Section ----
 

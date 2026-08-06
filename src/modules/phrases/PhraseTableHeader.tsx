@@ -14,6 +14,13 @@ import {
   ContextMenuSubTrigger,
 } from '@/components/ui/context-menu';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { MIcon } from '@/shell/shared-icon';
 import { CHECKBOX_COL, COLUMN_COLORS, isNumericColumn, type ColDef } from './shared';
 
@@ -111,8 +118,7 @@ export const PhraseTableHeader = React.memo(function PhraseTableHeader(props: Ph
                         onInteractOutside={(e) => {
                           const target = e.target as HTMLElement;
                           if (target.closest('.col-filter-popover')) return;
-                          const targetTag = target.tagName?.toLowerCase();
-                          if (targetTag === 'select' || targetTag === 'option') return;
+                          if (target.closest('[data-slot="select-content"]') || target.closest('[data-radix-popper-content-wrapper]')) return;
                           props.setFilterPopoverCol(null);
                         }}
                       >
@@ -120,25 +126,29 @@ export const PhraseTableHeader = React.memo(function PhraseTableHeader(props: Ph
                           <div className="text-[11px] font-semibold text-[var(--kc-text)]">
                             Фильтр: {c.label}
                           </div>
-                          <select
-                            className="w-full h-6 text-[11px] rounded border border-[var(--kc-border)] bg-[var(--kc-surface)] px-1"
+                          <Select
                             value={props.filterType}
-                            onChange={(e) => props.setFilterType(e.target.value as 'eq' | 'gt' | 'lt')}
+                            onValueChange={(v) => props.setFilterType(v as 'eq' | 'gt' | 'lt')}
                           >
-                            {isNumericColumn(c.key) ? (
-                              <>
-                                <option value="eq">{'Равно (=)'}</option>
-                                <option value="gt">{'Больше (>)'}</option>
-                                <option value="lt">{'Меньше (<)'}</option>
-                              </>
-                            ) : (
-                              <>
-                                <option value="eq">Содержит</option>
-                                <option value="gt">{'Больше (>)'}</option>
-                                <option value="lt">{'Меньше (<)'}</option>
-                              </>
-                            )}
-                          </select>
+                            <SelectTrigger className="w-full h-6 text-[11px] rounded border border-[var(--kc-border)] bg-[var(--kc-surface)] px-1" aria-label="Тип фильтра">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {isNumericColumn(c.key) ? (
+                                <>
+                                  <SelectItem value="eq">{'Равно (=)'}</SelectItem>
+                                  <SelectItem value="gt">{'Больше (>)'}</SelectItem>
+                                  <SelectItem value="lt">{'Меньше (<)'}</SelectItem>
+                                </>
+                              ) : (
+                                <>
+                                  <SelectItem value="eq">Содержит</SelectItem>
+                                  <SelectItem value="gt">{'Больше (>)'}</SelectItem>
+                                  <SelectItem value="lt">{'Меньше (<)'}</SelectItem>
+                                </>
+                              )}
+                            </SelectContent>
+                          </Select>
                           <Input
                             className="h-6 text-[11px]"
                             placeholder={isNumericColumn(c.key) ? 'Число...' : 'Текст...'}

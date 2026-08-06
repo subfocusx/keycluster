@@ -1,9 +1,7 @@
 import type { ModuleManifest } from '@/plugin-sdk';
 import { Button } from '@/components/ui/button';
+import { MIcon } from '@/shell/shared-icon';
 
-function MIcon({ name, className = '' }: { name: string; className?: string }) {
-  return <span className={`material-symbols-outlined ${className}`}>{name}</span>;
-}
 
 export function PluginPreviewCard({
   preview,

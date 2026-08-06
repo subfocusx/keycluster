@@ -11,10 +11,8 @@ import { PluginPreviewCard } from './plugin-manager/PluginPreviewCard';
 import { InstallResultBanner } from './plugin-manager/InstallResultBanner';
 import { Button } from '@/components/ui/button';
 import { installPluginAtomic } from './plugin-manager/plugin-installer';
+import { MIcon } from '@/shell/shared-icon';
 
-function MIcon({ name, className = '' }: { name: string; className?: string }) {
-  return <span className={`material-symbols-outlined ${className}`}>{name}</span>;
-}
 
 const LOG = 'plugin-installer';
 

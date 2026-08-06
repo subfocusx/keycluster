@@ -113,7 +113,6 @@ describe('ShellLayout', () => {
     render(
       <ShellLayout
         tabBar={<div data-testid="tab-bar">TabBar</div>}
-        ribbon={<div data-testid="ribbon">Ribbon</div>}
         mainContent={<div data-testid="main-content">Main</div>}
         statusBar={<div data-testid="status-bar">Status</div>}
       />
@@ -129,14 +128,12 @@ describe('ShellLayout', () => {
     render(
       <ShellLayout
         tabBar={<div data-testid="tab-bar">TabBar</div>}
-        ribbon={<div data-testid="ribbon">Ribbon</div>}
         mainContent={<div data-testid="main-content">Main</div>}
         statusBar={<div data-testid="status-bar">Status</div>}
       />
     );
 
     expect(screen.getByTestId('tab-bar')).toBeInTheDocument();
-    expect(screen.getByTestId('ribbon')).toBeInTheDocument();
     expect(screen.getByTestId('main-content')).toBeInTheDocument();
     expect(screen.getByTestId('status-bar')).toBeInTheDocument();
   });
@@ -145,7 +142,6 @@ describe('ShellLayout', () => {
     render(
       <ShellLayout
         tabBar={<div>TabBar</div>}
-        ribbon={<div>Ribbon</div>}
         mainContent={<div>Main</div>}
         statusBar={<div>Status</div>}
         overlays={<div data-testid="overlay">Overlay</div>}
@@ -159,7 +155,6 @@ describe('ShellLayout', () => {
     const { container } = render(
       <ShellLayout
         tabBar={<div>TabBar</div>}
-        ribbon={<div>Ribbon</div>}
         mainContent={<div>Main</div>}
         statusBar={<div>Status</div>}
       />
@@ -624,7 +619,6 @@ describe('Shell integration', () => {
             onRefresh={vi.fn()}
           />
         }
-        ribbon={null}
         mainContent={<div data-testid="main-area">Main Content</div>}
         statusBar={<StatusBar onTrashOpen={vi.fn()} />}
         overlays={
@@ -681,7 +675,6 @@ describe('Shell integration', () => {
             onRefresh={vi.fn()}
           />
         }
-        ribbon={null}
         mainContent={<div data-testid="main-content">Main</div>}
         statusBar={<StatusBar onTrashOpen={vi.fn()} />}
       />

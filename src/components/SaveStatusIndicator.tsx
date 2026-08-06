@@ -15,6 +15,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { MIcon } from '@/shell/shared-icon';
 
 // ---- Types ----
 
@@ -22,9 +23,6 @@ type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
 // ---- Icon helper ----
 
-function MIcon({ name, className = '' }: { name: string; className?: string }) {
-  return <span className={`material-symbols-outlined ${className}`}>{name}</span>;
-}
 
 // ---- Component ----
 

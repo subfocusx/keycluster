@@ -34,12 +34,10 @@ import {
   getLastSaveTime,
   getLastSaveError as getLastError,
 } from '@/plugin-sdk';
+import { MIcon } from '@/shell/shared-icon';
 
 // ---- Icon helper ----
 
-function MIcon({ name, className = '' }: { name: string; className?: string }) {
-  return <span className={`material-symbols-outlined ${className}`}>{name}</span>;
-}
 
 // ---- Preset intervals ----
 

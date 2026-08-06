@@ -8,10 +8,8 @@ import React from 'react';
 import type { KCID } from '@/plugin-sdk';
 import { ContextMenuContent, ContextMenuItem } from '@/components/ui/context-menu';
 import { BulkColorPickerSubmenu } from './color-picker-submenu';
+import { MIcon } from '@/shell/shared-icon';
 
-function MIcon({ name, className = '', style }: { name: string; className?: string; style?: React.CSSProperties }) {
-  return <span className={`material-symbols-outlined ${className}`} style={style}>{name}</span>;
-}
 
 export function GroupBulkContextMenu({ ids, bulkCount, multigroupMode, onBulkDelete, onBulkMove, onBulkSetColor, setMultigroupMode }: {
   ids: KCID[];

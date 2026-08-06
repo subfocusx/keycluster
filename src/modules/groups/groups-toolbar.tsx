@@ -11,10 +11,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuSubContent,
 } from '@/components/ui/dropdown-menu';
-
-function MIcon({ name, className = '', style }: { name: string; className?: string; style?: React.CSSProperties }) {
-  return <span className={`material-symbols-outlined ${className}`} style={style}>{name}</span>;
-}
+import { MIcon } from '@/shell/shared-icon';
 
 interface GroupsToolbarProps {
   onAddGroup: (parentId: KCID | null) => void;
@@ -48,7 +45,7 @@ export function GroupsToolbar({
       {/* Add dropdown */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button className="tool-btn !w-6 !h-6" title="Добавить группу">
+          <button className="tool-btn !w-6 !h-6" title="Добавить группу" aria-label="Добавить группу">
             <MIcon name="add" className="!text-[16px]" />
           </button>
         </DropdownMenuTrigger>
@@ -78,6 +75,7 @@ export function GroupsToolbar({
               })()
         }
         onClick={onMultigroupToggle}
+        aria-label={multigroupMode ? 'Выйти из мультигруппы' : 'Включить мультигруппу'}
         style={multigroupMode ? { color: 'var(--kc-blue)', borderColor: 'var(--kc-blue)' } : undefined}
       >
         <MIcon name="account_tree" className="!text-[16px]" />
@@ -92,6 +90,7 @@ export function GroupsToolbar({
               ? `Сортировка: ${sortField === 'name' ? 'текст' : sortField === 'phraseCount' ? 'фразы' : 'создание'} (${sortDir === 'asc' ? '↑' : '↓'})`
               : 'Сортировка групп'
             }
+            aria-label={sortField ? 'Сортировка групп (активна)' : 'Сортировка групп'}
           >
             <MIcon name="sort" className="!text-[16px]" />
           </button>
@@ -141,16 +140,9 @@ export function GroupsToolbar({
 
       {/* Selection counter */}
       {selectedGroupIds.size > 0 && (
-        <span style={{
-          marginLeft: 'auto',
-          fontSize: '9px',
-          color: 'var(--accent-blue)',
-          background: 'rgba(14,156,232,.1)',
-          border: '1px solid rgba(14,156,232,.2)',
-          borderRadius: '10px',
-          padding: '2px 7px',
-          whiteSpace: 'nowrap',
-        }}>
+        <span className="ml-auto text-[10px] whitespace-nowrap rounded-full px-1.5 py-0.5"
+          style={{ color: 'var(--accent-blue)', background: 'rgba(14,156,232,.1)', border: '1px solid rgba(14,156,232,.2)' }}
+        >
           {selectedGroupIds.size} выбрано
         </span>
       )}

@@ -1,9 +1,7 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import type { ModuleStatus, PluginStatusDetail } from '@/plugin-sdk';
-function MIcon({ name, className = '', style }: { name: string; className?: string; style?: React.CSSProperties }) {
-  return <span className={`material-symbols-outlined ${className}`}>{name}</span>;
-}
+import { MIcon } from '@/shell/shared-icon';
 
 function StatusBadge({ status }: { status: ModuleStatus['status'] }) {
   const variants: Record<string, { label: string; className: string }> = {

@@ -3,6 +3,13 @@ import type { Group, PluginContext } from '@/plugin-sdk';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { MIcon } from '@/shell/shared-icon';
 import { LABEL_COLOR_MAP, LABEL_COLORS, LABEL_NAMES } from './shared';
 import { type ColDef } from './shared';
@@ -81,31 +88,37 @@ export const PhrasesToolbar = React.memo(function PhrasesToolbar(props: PhrasesT
           </button>
         )}
       </div>
-      <select
-        className="h-6 pl-2 pr-6 text-[11px] rounded-[3px] border border-[var(--kc-border)] bg-[var(--kc-surface)] text-[var(--kc-text)] max-w-[110px] truncate"
-        value={props.labelFilter ?? ''}
-        onChange={e => props.setLabelFilter(e.target.value || null)}
-        title="Фильтр по метке"
+      <Select
+        value={props.labelFilter ?? '__all__'}
+        onValueChange={(v) => props.setLabelFilter(v === '__all__' ? null : v)}
       >
-        <option value="">Все метки</option>
-        {LABEL_COLORS.map(lc => (
-          <option key={lc.name} value={lc.name}>
-            {LABEL_NAMES[lc.name]}
-          </option>
-        ))}
-      </select>
-      {props.allTags.length > 0 && (
-        <select
-          className="h-6 pl-2 pr-6 text-[11px] rounded-[3px] border border-[var(--kc-border)] bg-[var(--kc-surface)] text-[var(--kc-text)] max-w-[130px] truncate"
-          value={props.tagFilter ?? ''}
-          onChange={e => props.setTagFilter(e.target.value || null)}
-          title="Фильтр по тегу"
-        >
-          <option value="">Все теги</option>
-          {props.allTags.filter(t => !LABEL_COLOR_MAP[t]).map(tag => (
-            <option key={tag} value={tag}>{tag}</option>
+        <SelectTrigger className="h-6 pl-2 pr-6 text-[11px] rounded-[3px] border border-[var(--kc-border)] bg-[var(--kc-surface)] text-[var(--kc-text)] max-w-[110px] truncate" title="Фильтр по метке" aria-label="Фильтр по метке">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="__all__">Все метки</SelectItem>
+          {LABEL_COLORS.map(lc => (
+            <SelectItem key={lc.name} value={lc.name}>
+              {LABEL_NAMES[lc.name]}
+            </SelectItem>
           ))}
-        </select>
+        </SelectContent>
+      </Select>
+      {props.allTags.length > 0 && (
+        <Select
+          value={props.tagFilter ?? '__all__'}
+          onValueChange={(v) => props.setTagFilter(v === '__all__' ? null : v)}
+        >
+          <SelectTrigger className="h-6 pl-2 pr-6 text-[11px] rounded-[3px] border border-[var(--kc-border)] bg-[var(--kc-surface)] text-[var(--kc-text)] max-w-[130px] truncate" title="Фильтр по тегу" aria-label="Фильтр по тегу">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="__all__">Все теги</SelectItem>
+            {props.allTags.filter(t => !LABEL_COLOR_MAP[t]).map(tag => (
+              <SelectItem key={tag} value={tag}>{tag}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       )}
       <div className="flex items-center gap-0.5">
         <button

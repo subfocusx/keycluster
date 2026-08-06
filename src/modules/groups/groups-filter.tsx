@@ -1,8 +1,6 @@
 import React from 'react';
+import { MIcon } from '@/shell/shared-icon';
 
-function MIcon({ name, className = '' }: { name: string; className?: string }) {
-  return <span className={`material-symbols-outlined ${className}`}>{name}</span>;
-}
 
 interface GroupsFilterBarProps {
   value: string;

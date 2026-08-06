@@ -17,10 +17,8 @@ import { useKCDialog } from '@/components/KCDialog';
 import { GroupItemContextMenu } from './group-context-menu';
 import { GroupBulkContextMenu } from './bulk-context-menu';
 import { getRuntime } from '@/plugin-sdk';
+import { MIcon } from '@/shell/shared-icon';
 
-function MIcon({ name, className = '', style }: { name: string; className?: string; style?: React.CSSProperties }) {
-  return <span className={`material-symbols-outlined ${className}`} style={style}>{name}</span>;
-}
 
 const REASON_LOCALIZATIONS: [RegExp, string][] = [
   [/same (commercial|transactional|informational|navigational) intent/i, 'Большинство фраз имеют одинаковый $1 интент'],

@@ -41,7 +41,7 @@ export interface TabRouterProps {
   onToolOpen: (id: string) => void;
   onSettingsOpen: () => void;
   onProjectOpen: () => void;
-  onThemeChange: () => void;
+  onThemeChange: (theme: 'light' | 'dark' | 'dark-pro') => void;
   onRefresh: () => void;
 }
 
