@@ -1,0 +1,822 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ===== KeyCluster Redesign — VS Code / Obsidian / LM Studio inspired ===== */
+/* Legacy alias map — old --kc-* names reference the new vars for backwards compat */
+:root, .dark {
+  --kc-bg: var(--bg-base);
+  --kc-surface: var(--bg-surface);
+  --kc-surface-hover: var(--bg-hover);
+  --kc-surface-active: var(--bg-hover);
+  --kc-surface-alt: var(--bg-panel);
+  --kc-surface-dark: var(--bg-panel);
+  --kc-text: var(--text-primary);
+  --kc-text-secondary: var(--text-secondary);
+  --kc-text-disabled: var(--text-disabled);
+  --kc-text-inverse: #ffffff;
+  --kc-text-dimmed: var(--text-disabled);
+  --kc-hover-bg: var(--bg-hover);
+  --kc-border: var(--border);
+  --kc-border-light: var(--border);
+  --kc-border-dark: var(--border);
+  --kc-blue: var(--accent-blue);
+  --kc-blue-dark: var(--accent-blue);
+  --kc-blue-light: color-mix(in srgb, var(--accent-blue) 15%, transparent);
+  --kc-blue-hover: var(--bg-selected);
+  --kc-green: var(--accent-green);
+  --kc-green-light: color-mix(in srgb, var(--accent-green) 15%, transparent);
+  --kc-red: var(--accent-red);
+  --kc-red-light: color-mix(in srgb, var(--accent-red) 15%, transparent);
+  --kc-orange: var(--accent-orange);
+  --kc-orange-light: color-mix(in srgb, var(--accent-orange) 15%, transparent);
+  --kc-yellow: #ffc107;
+  --kc-yellow-bg: color-mix(in srgb, #ffc107 20%, transparent);
+  --kc-table-header: var(--table-header);
+  --kc-table-row-alt: var(--table-row-alt);
+  --kc-table-row-hover: var(--table-row-hover);
+  --kc-table-row-selected: var(--table-row-selected);
+  --kc-table-row-focused: var(--bg-selected);
+  --kc-statusbar-bg: var(--statusbar-bg);
+  --kc-statusbar-text: var(--statusbar-text);
+  --kc-toolbar-bg: var(--bg-panel);
+  --kc-toolbar-border: var(--border);
+  --kc-ribbon-bg: var(--bg-surface);
+  --kc-ribbon-tab: var(--text-secondary);
+  --kc-ribbon-tab-active: var(--accent-blue);
+  --kc-ribbon-tab-active-bg: var(--bg-surface);
+  --kc-tree-selected: var(--bg-selected);
+  --kc-tree-hover: var(--bg-hover);
+  --kc-tree-line: var(--border);
+  --kc-primary: var(--accent-blue);
+}
+:root {
+  /* VS Code-inspired light theme (inverted) */
+  --bg-base: #f5f5f5;
+  --bg-panel: #e8e8e8;
+  --bg-surface: #ffffff;
+  --bg-hover: #e0e0e0;
+  --bg-selected: #cce5ff;
+  --border: #d5d5d5;
+  --text-primary: #1e1e1e;
+  --text-secondary: #666666;
+  --text-disabled: #9e9e9e;
+  --accent-blue: #0066b8;
+  --accent-purple: #7c6af7;
+  --accent-orange: #e8a245;
+  --accent-red: #d32f2f;
+  --accent-green: #2e7d32;
+
+  /* Table */
+  --table-header: #e8e8e8;
+  --table-row-alt: #f0f4f8;
+  --table-row-hover: var(--bg-hover);
+  --table-row-selected: var(--bg-selected);
+
+  /* Status bar */
+  --statusbar-bg: #0066b8;
+  --statusbar-text: #ffffff;
+
+  /* Log area */
+  --log-bg: #f0f0f0;
+
+  /* shadcn/ui compatibility */
+  --radius: 3px;
+  --background: var(--bg-base);
+  --foreground: var(--text-primary);
+  --card: var(--bg-surface);
+  --card-foreground: var(--text-primary);
+  --popover: var(--bg-surface);
+  --popover-foreground: var(--text-primary);
+  --primary: var(--accent-blue);
+  --primary-foreground: #ffffff;
+  --secondary: var(--bg-hover);
+  --secondary-foreground: var(--text-primary);
+  --muted: var(--bg-hover);
+  --muted-foreground: var(--text-secondary);
+  --accent: var(--accent-blue);
+  --accent-foreground: #ffffff;
+  --destructive: var(--accent-red);
+  --border: var(--border);
+  --input: var(--border);
+  --ring: var(--accent-blue);
+}
+
+/* Dark theme (VS Code inspired) */
+.dark {
+  --bg-base: #1e1e1e;
+  --bg-panel: #252526;
+  --bg-surface: #2d2d2d;
+  --bg-hover: #37373d;
+  --bg-selected: #094771;
+  --border: #3e3e42;
+  --text-primary: #cccccc;
+  --text-secondary: #858585;
+  --text-disabled: #555558;
+  --accent-blue: #0e9ce8;
+  --accent-purple: #7c6af7;
+  --accent-orange: #e8a245;
+  --accent-red: #f44747;
+  --accent-green: #4ec994;
+
+  --table-header: #333333;
+  --table-row-alt: #252526;
+  --table-row-hover: var(--bg-hover);
+  --table-row-selected: var(--bg-selected);
+
+  --statusbar-bg: #007acc;
+  --statusbar-text: #ffffff;
+
+  --log-bg: #1a1a1a;
+
+  --background: var(--bg-base);
+  --foreground: var(--text-primary);
+  --card: var(--bg-surface);
+  --card-foreground: var(--text-primary);
+  --popover: var(--bg-surface);
+  --popover-foreground: var(--text-primary);
+  --primary: var(--accent-blue);
+  --primary-foreground: #ffffff;
+  --secondary: var(--bg-hover);
+  --secondary-foreground: var(--text-primary);
+  --muted: var(--bg-hover);
+  --muted-foreground: var(--text-secondary);
+  --accent: var(--accent-blue);
+  --accent-foreground: #ffffff;
+  --destructive: var(--accent-red);
+  --border: var(--border);
+  --input: var(--border);
+  --ring: var(--accent-blue);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: 'Inter Variable', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', Consolas, monospace;
+  --color-sidebar-ring: var(--ring);
+  --color-sidebar-border: var(--border);
+  --color-sidebar-accent-foreground: var(--accent);
+  --color-sidebar-accent: var(--bg-hover);
+  --color-sidebar-primary-foreground: #ffffff;
+  --color-sidebar-primary: var(--accent-blue);
+  --color-sidebar-foreground: var(--text-primary);
+  --color-sidebar: var(--bg-surface);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: 2px;
+  --radius-md: 3px;
+  --radius-lg: 4px;
+  --radius-xl: 6px;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    overflow-x: hidden;
+    max-width: 100vw;
+    font-family: 'Inter Variable', 'Segoe UI', system-ui, sans-serif;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-size: 13px;
+    overflow-x: hidden;
+    max-width: 100vw;
+    font-family: 'Inter Variable', 'Segoe UI', system-ui, sans-serif;
+  }
+}
+
+/* ===== Radix Portal containment ===== */
+[data-slot="dialog-portal"],
+[data-slot="sheet-portal"],
+[data-slot="scroll-area-viewport"],
+[data-radix-toast-viewport] {
+  max-width: 100vw !important;
+  overflow-x: hidden !important;
+  background: var(--bg-surface) !important;
+}
+[data-radix-scroll-area-viewport] > div {
+  display: block !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+[data-slot="dialog-content"] > * {
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+/* ===== Material Symbols Outlined ===== */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined Variable';
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+  vertical-align: middle;
+  font-size: 18px;
+  line-height: 1;
+  user-select: none;
+}
+
+/* ===== Typography ===== */
+.font-h1 {
+  font-size: 15px;
+  line-height: 20px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.font-h2 {
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 600;
+}
+.font-body {
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 400;
+}
+.font-body-sm {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 400;
+}
+.font-mono-data {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  font-family: 'JetBrains Mono Variable', Consolas, monospace;
+  font-variant-numeric: tabular-nums;
+}
+.font-label-caps {
+  font-size: 11px;
+  line-height: 14px;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+/* ===== Keyword word interaction ===== */
+.keyword-word {
+  cursor: pointer;
+  padding: 0 1px;
+  border-radius: 2px;
+  transition: all 0.1s;
+}
+.keyword-word:hover {
+  background-color: color-mix(in srgb, var(--accent-red) 20%, transparent);
+  text-decoration: underline;
+}
+.keyword-word.is-negative {
+  color: var(--accent-red);
+  font-weight: 600;
+  background-color: color-mix(in srgb, var(--accent-red) 20%, transparent);
+  text-decoration: line-through;
+}
+
+/* ===== Phrase marked as minus-word ===== */
+.phrase-is-minus {
+  text-decoration: line-through;
+  color: var(--accent-red);
+  opacity: 0.7;
+}
+
+/* ===== Column separator ===== */
+.col-separator-left {
+  border-left: 1px dashed var(--border);
+}
+
+/* ===== Column header with resize handle ===== */
+.phrases-col-header {
+  position: relative;
+}
+
+/* ===== Column resize handle ===== */
+.col-resize-handle {
+  position: absolute;
+  right: -5px;
+  top: 0;
+  bottom: 0;
+  width: 11px;
+  cursor: col-resize;
+  z-index: 5;
+  background: transparent;
+}
+.col-resize-handle::before {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: repeating-linear-gradient(
+    to bottom,
+    var(--border) 0px,
+    var(--border) 2px,
+    transparent 2px,
+    transparent 4px
+  );
+  opacity: 0.7;
+  transition: background 0.12s, width 0.12s, opacity 0.12s;
+}
+.col-resize-handle:hover::before {
+  background: var(--accent-blue);
+  width: 2px;
+  left: 4px;
+  opacity: 1;
+}
+.col-resize-handle:active::before {
+  background: var(--accent-blue);
+  width: 2px;
+  left: 4px;
+  opacity: 1;
+}
+.col-resize-handle:hover {
+  background: rgba(14, 156, 232, 0.04);
+}
+
+/* ===== Row action visibility on hover ===== */
+.row-action {
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+tr:hover .row-action {
+  opacity: 1;
+}
+
+/* ===== Compact scrollbars ===== */
+.compact-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.compact-scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.compact-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.compact-scroll::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+.compact-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--text-disabled);
+}
+
+/* ===== Checkbox ===== */
+.kc-checkbox {
+  width: 15px;
+  height: 15px;
+  border-radius: 2px;
+}
+
+/* ===== Ribbon Button ===== */
+.ribbon-btn {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 6px 8px;
+  border-radius: 3px;
+  cursor: pointer;
+  color: var(--text-primary);
+  border: 1px solid transparent;
+  background: transparent;
+  min-width: 52px;
+  transition: none;
+}
+.ribbon-btn:hover {
+  background-color: var(--bg-hover);
+}
+.ribbon-btn:active,
+.ribbon-btn.active {
+  background-color: var(--bg-selected);
+  color: var(--accent-blue);
+}
+.ribbon-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.ribbon-btn .ribbon-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+.ribbon-btn .ribbon-label {
+  font-size: 10px;
+  line-height: 12px;
+  white-space: nowrap;
+  color: var(--text-secondary);
+}
+.ribbon-btn:hover .ribbon-label {
+  color: var(--text-primary);
+}
+.ribbon-btn.active .ribbon-label {
+  color: var(--accent-blue);
+}
+
+/* ===== Small tool button ===== */
+.tool-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 3px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  border: 1px solid transparent;
+  background: transparent;
+  padding: 0;
+  transition: none;
+}
+.tool-btn:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
+}
+.tool-btn.active {
+  background-color: var(--bg-selected);
+  color: var(--accent-blue);
+}
+
+/* ===== Group badge ===== */
+.group-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 11px;
+  line-height: 15px;
+  font-weight: 500;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ===== Status bar progress ===== */
+.status-progress {
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255,255,255,0.2);
+  overflow: hidden;
+  width: 100px;
+}
+.status-progress-bar {
+  height: 100%;
+  border-radius: 2px;
+  background: #ffffff;
+  transition: width 0.3s ease;
+}
+
+/* ===== Ribbon tab ===== */
+.ribbon-tab {
+  padding: 4px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  border: 1px solid transparent;
+  border-bottom: none;
+  border-radius: 4px 4px 0 0;
+  cursor: pointer;
+  background: transparent;
+  position: relative;
+  bottom: -1px;
+}
+.ribbon-tab:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+.ribbon-tab.active {
+  color: var(--text-primary);
+  background: var(--bg-surface);
+  border-color: var(--border);
+  border-bottom: 2px solid var(--accent-blue);
+  font-weight: 600;
+}
+.ribbon-tab[data-tab="ai"].active {
+  border-bottom-color: var(--accent-purple);
+}
+
+/* ===== Dialog close button ===== */
+.dialog-close-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  line-height: 1;
+  transition: none;
+}
+.dialog-close-btn:hover {
+  background: color-mix(in srgb, var(--accent-red) 15%, transparent);
+  color: var(--accent-red);
+}
+
+/* ===== Ribbon separator ===== */
+.ribbon-sep {
+  width: 1px;
+  height: 36px;
+  background: var(--border);
+  margin: 0 4px;
+  align-self: center;
+}
+
+/* Ribbon group wrapper with label */
+.ribbon-group {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  position: relative;
+  padding-bottom: 2px;
+}
+.ribbon-group-buttons {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 1;
+}
+.ribbon-group-label {
+  position: absolute;
+  bottom: 1px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 9px;
+  color: var(--text-disabled);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+  letter-spacing: 0.3px;
+}
+
+/* ===== AI tab purple accent underline ===== */
+.ribbon-btn.ai-active {
+  border-bottom: 2px solid var(--accent-purple);
+  border-radius: 3px 3px 0 0;
+}
+
+/* ===== Data table row striping ===== */
+.data-row-even {
+  background-color: var(--bg-surface);
+}
+.data-row-odd {
+  background-color: var(--table-row-alt);
+}
+.data-row-even:hover,
+.data-row-odd:hover {
+  background-color: var(--table-row-hover);
+}
+.data-row-selected {
+  background-color: var(--table-row-selected) !important;
+}
+.data-row-focused {
+  background-color: var(--table-row-selected) !important;
+}
+
+/* ===== Tree item (right panel groups) ===== */
+.tree-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  padding: 0 6px 0 0;
+  margin: 1px 4px;
+  cursor: pointer;
+  border-radius: 3px;
+  font-size: 12px;
+  color: var(--text-primary);
+  position: relative;
+  transition: background 80ms;
+  border-left: 2px solid transparent;
+}
+.tree-item:hover {
+  background: var(--bg-hover);
+}
+.tree-item:hover .group-local-sort {
+  display: flex !important;
+}
+.tree-item.active {
+  background: var(--bg-selected);
+  font-weight: 600;
+}
+.tree-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 2px;
+  bottom: 2px;
+  width: 2px;
+  background: var(--accent-blue);
+  border-radius: 1px;
+}
+.tree-item.selected {
+  background: rgba(14, 156, 232, 0.10);
+  border-left-color: var(--accent-blue);
+}
+.tree-item.active.selected {
+  background: var(--bg-selected);
+  border-left-color: var(--accent-blue);
+}
+.tree-item .tree-count {
+  font-size: 10px;
+  color: var(--text-secondary);
+  padding-right: 4px;
+  min-width: 28px;
+  text-align: right;
+  flex-shrink: 0;
+  font-family: 'JetBrains Mono Variable', Consolas, monospace;
+}
+.tree-item.active .tree-count {
+  color: var(--accent-blue);
+}
+.tree-item .tree-icon {
+  font-size: 14px;
+  color: var(--accent-orange);
+  flex-shrink: 0;
+  transition: color 80ms;
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+}
+.tree-item.active .tree-icon {
+  color: var(--accent-blue);
+}
+
+/* Minus-words indicator in the group tree */
+.tree-item .tree-minus {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+  margin-right: 3px;
+  padding: 0 3px;
+  height: 15px;
+  border-radius: 3px;
+  color: var(--accent-red);
+  background: color-mix(in srgb, var(--accent-red) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-red) 28%, transparent);
+  font-family: 'JetBrains Mono Variable', Consolas, monospace;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+}
+.tree-item .tree-minus:hover {
+  background: color-mix(in srgb, var(--accent-red) 22%, transparent);
+}
+.tree-item .tree-minus.tree-minus-empty {
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px dashed color-mix(in srgb, var(--text-secondary) 35%, transparent);
+  opacity: 0.6;
+}
+.tree-item .tree-minus.tree-minus-empty:hover {
+  background: color-mix(in srgb, var(--accent-red) 12%, transparent);
+  color: var(--accent-red);
+  border: 1px solid color-mix(in srgb, var(--accent-red) 28%, transparent);
+  opacity: 1;
+}
+
+.expand-btn {
+  width: 14px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-disabled);
+  flex-shrink: 0;
+  font-size: 11px;
+  transition: color 80ms;
+  cursor: pointer;
+}
+.tree-item:hover .expand-btn {
+  color: var(--text-secondary);
+}
+.tree-item.active .expand-btn {
+  color: rgba(255,255,255,.5);
+}
+
+.section-divider {
+  display: flex;
+  align-items: center;
+  padding: 6px 12px 2px;
+  gap: 6px;
+}
+.section-divider span {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-disabled);
+  white-space: nowrap;
+}
+.section-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ===== Metric colors ===== */
+.metric-good { color: var(--accent-green); }
+.metric-warn { color: var(--accent-orange); }
+.metric-bad { color: var(--accent-red); }
+
+/* ===== Loading Screen — Cluster Animation ===== */
+
+@keyframes cluster-dot {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(var(--dx), var(--dy)) scale(0.65);
+    opacity: 0.5;
+  }
+}
+
+@keyframes cluster-shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(400%); }
+}
+
+/* ===== Tooltip style ===== */
+.kc-tooltip {
+  background: #252526;
+  border: 1px solid #3e3e42;
+  color: #cccccc;
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 3px;
+}
+
+/* ===== Dialog modal unified style ===== */
+.kc-dialog-overlay {
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(2px);
+}
+.kc-dialog-content {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+
+/* ===== Input fields ===== */
+.kc-input {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  height: 28px;
+  font-size: 12px;
+  padding: 0 8px;
+  color: var(--text-primary);
+  outline: none;
+}
+.kc-input:focus {
+  border-color: var(--accent-blue);
+}
+.kc-input::placeholder {
+  color: var(--text-secondary);
+}
+
+/* ===== Settings Modal: flex scroll chain fix ===== */
+[data-testid="settings-modal"] {
+  contain: layout;
+}
+[data-testid="settings-modal"] > .flex-1 {
+  min-height: 0;
+}
+
+/* ===== AI log area ===== */
+.ai-log-area {
+  background: var(--log-bg);
+  font-family: 'JetBrains Mono Variable', Consolas, monospace;
+  font-size: 11px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+}

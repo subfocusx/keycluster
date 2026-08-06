@@ -1,0 +1,14 @@
+node_modules/
+dist/
+src-tauri/target/
+*.log
+.DS_Store
+
+# coverage / test artifacts
+*coverage*.txt
+*_cov.txt
+*-cov.txt
+cov*.txt
+full-test.txt
+vitest_*.txt
+tsconfig.tsbuildinfo

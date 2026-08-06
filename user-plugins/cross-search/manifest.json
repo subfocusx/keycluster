@@ -1,0 +1,27 @@
+{
+    "id":  "cross-search",
+    "name":  "Перекрёстный поиск",
+    "version":  "1.0.0",
+    "description":  "Поиск дубликатов фраз между группами",
+    "author":  "KeyCluster",
+    "category":  "analysis",
+    "dependencies":  [
+                         "groups",
+                         "phrases"
+                     ],
+    "slots":  [
+                  "ribbon:tools",
+                  "left-panel"
+              ],
+    "settingsSchema":  [
+                           {
+                               "key":  "minGroups",
+                               "type":  "number",
+                               "label":  "Мин. число групп для дубликата",
+                               "default":  2
+                           }
+                       ],
+    "entry":  "index.ts",
+    "repository":  "https://github.com/keycluster/kc-cross-search",
+    "minAppVersion":  "0.3.0"
+}

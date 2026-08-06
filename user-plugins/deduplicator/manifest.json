@@ -1,0 +1,23 @@
+{
+    "id":  "deduplicator",
+    "name":  "Дедупликатор",
+    "version":  "1.0.0",
+    "description":  "Удаляет дублирующиеся фразы",
+    "author":  "KeyCluster",
+    "category":  "data",
+    "dependencies":  [
+                         "phrases"
+                     ],
+    "slots":  [
+                  "ribbon:tools"
+              ],
+    "settingsSchema":  [
+                           {
+                               "key":  "caseSensitive",
+                               "type":  "boolean",
+                               "label":  "Учитывать регистр",
+                               "default":  false
+                           }
+                       ],
+    "entry":  "index.ts"
+}

@@ -1,0 +1,27 @@
+{
+    "id":  "minus-words",
+    "name":  "Минус-фразы",
+    "version":  "1.0.0",
+    "description":  "Глобальные и групповые минус-фразы, типы поиска, отчёт применения",
+    "author":  "KeyCluster",
+    "category":  "data",
+    "dependencies":  [
+                         "groups",
+                         "phrases"
+                     ],
+    "slots":  [
+                  "ribbon:tools",
+                  "left-panel"
+              ],
+    "settingsSchema":  [
+                           {
+                               "key":  "broadMatch",
+                               "type":  "boolean",
+                               "label":  "Широкое соответствие по умолчанию",
+                               "default":  false
+                           }
+                       ],
+    "entry":  "index.ts",
+    "repository":  "https://github.com/keycluster/kc-minus-words",
+    "minAppVersion":  "0.3.0"
+}

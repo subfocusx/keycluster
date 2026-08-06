@@ -1,0 +1,20 @@
+{
+  "name": "multitool",
+  "version": "1.0.0",
+  "description": "Плагин для очистки и фильтрации ключевых фраз в группах.",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "esbuild": "^0.28.0",
+    "plugin-sdk": "^0.2.0"
+  }
+}

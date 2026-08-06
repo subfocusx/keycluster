@@ -1,0 +1,12 @@
+{
+    "id":  "favorites",
+    "name":  "Избранное",
+    "version":  "1.0.0",
+    "description":  "Звёздочки для фраз: отмечайте важные фразы и фильтруйте только избранное",
+    "author":  "KeyCluster",
+    "category":  "data",
+    "slots":  [
+                  "phrase-row:actions"
+              ],
+    "entry":  "index.ts"
+}

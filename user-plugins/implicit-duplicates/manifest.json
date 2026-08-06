@@ -1,0 +1,44 @@
+{
+    "id":  "implicit-duplicates",
+    "name":  "Неявные дубликаты",
+    "version":  "1.0.0",
+    "description":  "Поиск и удаление неявных дублей: перестановки слов, морфология, опечатки, лишние слова",
+    "author":  "KeyCluster",
+    "category":  "analysis",
+    "dependencies":  [
+                         "phrases"
+                     ],
+    "slots":  [
+                  "ribbon:tools",
+                  "left-panel"
+              ],
+    "settingsSchema":  [
+                           {
+                               "key":  "threshold",
+                               "type":  "number",
+                               "label":  "Порог схожести (%)",
+                               "default":  80
+                           },
+                           {
+                               "key":  "ignoreStopWords",
+                               "type":  "boolean",
+                               "label":  "Игнорировать стоп-слова",
+                               "default":  true
+                           },
+                           {
+                               "key":  "compareWordOrder",
+                               "type":  "boolean",
+                               "label":  "Учитывать порядок слов",
+                               "default":  false
+                           },
+                           {
+                               "key":  "keepHigherFrequency",
+                               "type":  "boolean",
+                               "label":  "Оставлять фразу с большей частотностью",
+                               "default":  true
+                           }
+                       ],
+    "entry":  "index.ts",
+    "repository":  "https://github.com/keycluster/kc-implicit-duplicates",
+    "minAppVersion":  "0.3.0"
+}

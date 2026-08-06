@@ -1,0 +1,32 @@
+{
+    "id":  "find-replace",
+    "name":  "Найти и заменить",
+    "version":  "1.0.0",
+    "description":  "Поиск и замена в фразах: regex, регистр, целые слова",
+    "author":  "KeyCluster",
+    "category":  "data",
+    "dependencies":  [
+                         "phrases"
+                     ],
+    "slots":  [
+                  "ribbon:tools",
+                  "left-panel"
+              ],
+    "settingsSchema":  [
+                           {
+                               "key":  "caseSensitive",
+                               "type":  "boolean",
+                               "label":  "Учитывать регистр",
+                               "default":  false
+                           },
+                           {
+                               "key":  "useRegex",
+                               "type":  "boolean",
+                               "label":  "Регулярные выражения",
+                               "default":  false
+                           }
+                       ],
+    "entry":  "index.ts",
+    "repository":  "https://github.com/keycluster/kc-find-replace",
+    "minAppVersion":  "0.3.0"
+}

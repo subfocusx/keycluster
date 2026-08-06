@@ -1,0 +1,80 @@
+{
+    "id":  "ai",
+    "name":  "AI",
+    "version":  "1.0.0",
+    "description":  "AI-инструменты для семантических операций: переименование групп и генерация описаний на основе LLM",
+    "author":  "KeyCluster",
+    "category":  "algorithms",
+    "slots":  [
+                  "left-panel"
+              ],
+    "settingsSchema":  [
+                           {
+                               "key":  "enabled",
+                               "type":  "boolean",
+                               "label":  "Включить AI",
+                               "default":  false
+                           },
+                           {
+                               "key":  "provider",
+                               "type":  "select",
+                               "label":  "Провайдер",
+                               "default":  "ollama",
+                               "options":  [
+                                               "ollama",
+                                               "lmstudio"
+                                           ]
+                           },
+                           {
+                               "key":  "endpoint",
+                               "type":  "string",
+                               "label":  "Endpoint",
+                               "default":  "http://localhost:11434/v1/chat/completions"
+                           },
+                           {
+                               "key":  "model",
+                               "type":  "string",
+                               "label":  "Модель",
+                               "default":  "qwen2.5-coder:7b"
+                           },
+                           {
+                               "key":  "temperature",
+                               "type":  "number",
+                               "label":  "Temperature",
+                               "default":  0.3
+                           },
+                           {
+                               "key":  "timeout",
+                               "type":  "number",
+                               "label":  "Таймаут (мс)",
+                               "default":  120000
+                           },
+                           {
+                               "key":  "batchSize",
+                               "type":  "number",
+                               "label":  "Размер батча",
+                               "default":  5
+                           },
+                           {
+                               "key":  "maxTokens",
+                               "type":  "number",
+                               "label":  "Max tokens",
+                               "default":  2048
+                           },
+                           {
+                               "key":  "debugMode",
+                               "type":  "boolean",
+                               "label":  "Режим отладки",
+                               "default":  false
+                           },
+                           {
+                               "key":  "cacheEnabled",
+                               "type":  "boolean",
+                               "label":  "Кэш AI",
+                               "default":  true
+                           }
+                       ],
+    "entry":  "index.ts",
+    "repository":  "https://github.com/keycluster/kc-ai",
+    "minAppVersion":  "0.3.0"
+}

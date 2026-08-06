@@ -1,0 +1,45 @@
+{
+  "id": "seo-multitool",
+  "name": "SEO Multitool",
+  "version": "1.2.0",
+  "description": "Очистка и фильтрация ключевых фраз: удаление дублей, пустых строк, спецсимволов; фильтры по длине, количеству слов, числам и вопросам",
+  "author": "Plugin Developer",
+  "icon": "search",
+  "category": "seo",
+  "slot": [
+    "ribbon:tools",
+    "context-menu:group"
+  ],
+  "entry": "index.js",
+  "dependencies": [],
+  "settingsSchema": [
+    {
+      "key": "syncWithSelection",
+      "type": "boolean",
+      "label": "Синхронизировать с выделением",
+      "default": false
+    },
+    {
+      "key": "defaultFilterMode",
+      "type": "select",
+      "label": "Режим фильтра по умолчанию",
+      "default": "copy",
+      "options": ["copy", "move"]
+    },
+    {
+      "key": "showStats",
+      "type": "boolean",
+      "label": "Показывать статистику",
+      "default": true
+    },
+    {
+      "key": "historySize",
+      "type": "number",
+      "label": "Размер истории операций",
+      "default": 10,
+      "min": 5,
+      "max": 50,
+      "step": 5
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/icon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KeyCluster — Кластеризация ключевых фраз</title>
+    <style>
+      #splash {
+        position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+        background: #F5F5F5; z-index: 9999; font-family: system-ui, -apple-system, sans-serif;
+        transition: opacity 0.3s ease-out;
+      }
+      #splash.hide { opacity: 0; pointer-events: none; }
+      .splash-dot {
+        position: absolute; width: 10px; height: 10px; border-radius: 50%;
+        background: #4A90D9; top: 50%; left: 50%; margin: -5px 0 0 -5px;
+        opacity: 0;
+      }
+      @keyframes splash-dot {
+        0%, 100% { transform: translate(0,0) scale(1); opacity: 1; }
+        50% { transform: translate(var(--dx), var(--dy)) scale(0.65); opacity: 0.5; }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="splash">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:24px">
+        <div class="splash-dot" style="animation:splash-dot 2.8s ease-in-out infinite;animation-delay:0s;--dx:-40px;--dy:-40px"></div>
+        <div class="splash-dot" style="animation:splash-dot 2.8s ease-in-out infinite;animation-delay:0.15s;--dx:40px;--dy:-30px"></div>
+        <div class="splash-dot" style="animation:splash-dot 2.8s ease-in-out infinite;animation-delay:0.3s;--dx:-30px;--dy:40px"></div>
+        <div class="splash-dot" style="animation:splash-dot 2.8s ease-in-out infinite;animation-delay:0.45s;--dx:35px;--dy:35px"></div>
+        <div class="splash-dot" style="animation:splash-dot 2.8s ease-in-out infinite;animation-delay:0.6s;--dx:0px;--dy:-48px"></div>
+        <div class="splash-dot" style="animation:splash-dot 2.8s ease-in-out infinite;animation-delay:0.75s;--dx:48px;--dy:0px"></div>
+        <div class="splash-dot" style="animation:splash-dot 2.8s ease-in-out infinite;animation-delay:0.9s;--dx:-48px;--dy:0px"></div>
+        <div class="splash-dot" style="animation:splash-dot 2.8s ease-in-out infinite;animation-delay:1.05s;--dx:0px;--dy:48px"></div>
+        <div style="font-size:20px;font-weight:700;letter-spacing:-0.02em;color:#212121">KeyCluster</div>
+      </div>
+    </div>
+    <div id="root"></div>
+    <script>
+      // Remove splash when React renders into #root
+      var rootEl = document.getElementById('root');
+      if (rootEl) {
+        var observer = new MutationObserver(function () {
+          if (rootEl.children.length > 0) {
+            document.getElementById('splash')?.classList.add('hide');
+            observer.disconnect();
+          }
+        });
+        observer.observe(rootEl, { childList: true });
+        // Fallback: hide after 5s no matter what
+        setTimeout(function () {
+          document.getElementById('splash')?.classList.add('hide');
+          observer.disconnect();
+        }, 5000);
+      }
+    </script>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

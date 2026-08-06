@@ -1,0 +1,33 @@
+{
+    "id":  "clustering",
+    "name":  "Кластеризация",
+    "version":  "4.0.0",
+    "description":  "Группировка фраз по словам и по составу (Jaccard в Web Worker) с предобработкой",
+    "author":  "KeyCluster",
+    "category":  "algorithms",
+    "dependencies":  [
+                         "groups",
+                         "phrases"
+                     ],
+    "slots":  [
+                  "ribbon:tools",
+                  "left-panel"
+              ],
+    "settingsSchema":  [
+                           {
+                               "key":  "threshold",
+                               "type":  "number",
+                               "label":  "Порог схожести (0-1)",
+                               "default":  0.3
+                           },
+                           {
+                               "key":  "minClusterSize",
+                               "type":  "number",
+                               "label":  "Мин. размер кластера",
+                               "default":  2
+                           }
+                       ],
+    "entry":  "index.ts",
+    "repository":  "https://github.com/keycluster/kc-clustering",
+    "minAppVersion":  "0.3.0"
+}

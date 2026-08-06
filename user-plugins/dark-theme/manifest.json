@@ -1,0 +1,10 @@
+{
+  "id": "dark-theme",
+  "name": "Тёмная тема Pro",
+  "version": "1.0.0",
+  "description": "Кастомная тёмная тема с синими акцентами",
+  "category": "custom",
+  "slot": ["theme"],
+  "entry": "index.ts",
+  "dependencies": []
+}

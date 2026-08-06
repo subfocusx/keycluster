@@ -1,0 +1,33 @@
+{
+    "id":  "group-analysis",
+    "name":  "Анализ групп",
+    "version":  "2.0.0",
+    "description":  "Группировка фраз по отдельным словам (как в Key Collector) с предобработкой",
+    "author":  "KeyCluster",
+    "category":  "algorithms",
+    "dependencies":  [
+                         "groups",
+                         "phrases"
+                     ],
+    "slots":  [
+                  "ribbon:tools",
+                  "left-panel"
+              ],
+    "settingsSchema":  [
+                           {
+                               "key":  "minGroupSize",
+                               "type":  "number",
+                               "label":  "Мин. размер группы",
+                               "default":  2
+                           },
+                           {
+                               "key":  "stopWords",
+                               "type":  "string",
+                               "label":  "Стоп-слова (через запятую)",
+                               "default":  "в, на, с, и, по, из, за, к, у, о, от, для, как, не, но, а, это, то, все, он, она, они, мы, вы, тут, где, там, что, кто, чем, при, через, между, над, под, без, до, со, об, ей, его, её, их, им, ей, нас, вам, вас, нас"
+                           }
+                       ],
+    "entry":  "index.ts",
+    "repository":  "https://github.com/keycluster/kc-group-analysis",
+    "minAppVersion":  "0.3.0"
+}

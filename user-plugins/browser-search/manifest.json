@@ -1,0 +1,20 @@
+{
+    "id":  "browser-search",
+    "name":  "Поиск в браузере",
+    "version":  "1.0.0",
+    "description":  "Кнопка поиска напротив каждой фразы + настройка поисковой системы",
+    "author":  "KeyCluster",
+    "category":  "data",
+    "slots":  [
+                  "phrase-row:actions"
+              ],
+    "settingsSchema":  [
+                           {
+                               "key":  "searchEngine",
+                               "type":  "string",
+                               "label":  "Поисковик",
+                               "default":  "yandex"
+                           }
+                       ],
+    "entry":  "index.ts"
+}

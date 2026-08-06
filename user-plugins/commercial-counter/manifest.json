@@ -1,0 +1,12 @@
+{
+    "id":  "commercial-counter",
+    "name":  "Счётчик коммерческих слов",
+    "version":  "1.0.0",
+    "description":  "Подсчитывает коммерческие слова в группах",
+    "author":  "KeyCluster",
+    "category":  "analysis",
+    "slot":  [
+                 "group:toolbar"
+             ],
+    "entry":  "index.ts"
+}

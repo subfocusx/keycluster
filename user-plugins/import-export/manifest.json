@@ -1,0 +1,33 @@
+{
+    "id":  "import-export",
+    "name":  "Импорт/Экспорт",
+    "version":  "1.0.0",
+    "description":  "Импорт и экспорт данных: CSV, TSV, TXT, JSON, XLSX с маппингом столбцов",
+    "author":  "KeyCluster",
+    "category":  "data",
+    "dependencies":  [
+                         "groups",
+                         "phrases"
+                     ],
+    "slots":  [
+                  "ribbon:import-export",
+                  "left-panel"
+              ],
+    "settingsSchema":  [
+                           {
+                               "key":  "defaultFormat",
+                               "type":  "select",
+                               "label":  "Формат по умолчанию",
+                               "default":  "csv",
+                               "options":  [
+                                               "csv",
+                                               "xlsx",
+                                               "json",
+                                               "txt"
+                                           ]
+                           }
+                       ],
+    "entry":  "index.ts",
+    "repository":  "https://github.com/keycluster/kc-import-export",
+    "minAppVersion":  "0.3.0"
+}

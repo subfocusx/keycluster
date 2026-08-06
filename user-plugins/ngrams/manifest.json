@@ -1,0 +1,38 @@
+{
+    "id":  "ngrams",
+    "name":  "N-граммы",
+    "version":  "2.0.0",
+    "description":  "Группировка фраз по N-граммам (биграммам, триграммам)",
+    "author":  "KeyCluster",
+    "category":  "algorithms",
+    "dependencies":  [
+                         "groups",
+                         "phrases"
+                     ],
+    "slots":  [
+                  "ribbon:tools"
+              ],
+    "settingsSchema":  [
+                           {
+                               "key":  "ngramSize",
+                               "type":  "number",
+                               "label":  "Размер N-граммы",
+                               "default":  2
+                           },
+                           {
+                               "key":  "threshold",
+                               "type":  "number",
+                               "label":  "Порог схожести (0-1)",
+                               "default":  0.3
+                           },
+                           {
+                               "key":  "minGroupSize",
+                               "type":  "number",
+                               "label":  "Мин. размер группы",
+                               "default":  2
+                           }
+                       ],
+    "entry":  "index.ts",
+    "repository":  "https://github.com/keycluster/kc-ngrams",
+    "minAppVersion":  "0.3.0"
+}
