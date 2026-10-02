@@ -66,3 +66,10 @@ portable/               # собранный keycluster.exe 19.3MB (коммит
 - Секретов/ключей/персданных в коде нет: AI только Ollama/LMStudio localhost, API-токен генерится в рантайме (UUID), захардкоженных `sk-/ghp-/AKIA` нет, `.env` нет
 - `portable/`, `dist/` добавлены в .gitignore (не пушатся)
 - Запушено в `subfocusx/keycluster` (main 96e603e), репозиторий переведён в public
+
+## Охота за косяками 2026-10-02
+- Тесты: было 2656 passed / 8 failed → стало **2664 passed / 0 failed** (13 skipped). Исправлены 4 файла: kbd-счётчик 4→8, Delete-тест (мок KCDialog.confirm + await), export-dialog (Radix Select открывается кликом, не selectOptions), minus-words (потерянные импорты userEvent/createEventBus, триггер без текста).
+- Rust: `/api/token` теперь требует auth; checksum снапшота считается от хранимого `snapshot_str` (было от `data_str` — все API-снапшоты не проходили verify).
+- Скаут Rust нашёл дополнительно (не чинено): SSRF-дыры в http.rs (IPv6-mapped bypass, DNS-rebinding), FK без ON DELETE (проекты со снапшотами неудаляемы), restore пишет `data="{}"` при чужой форме бэкапа, CORS `AllowOrigin::exact(localhost)` бьёт мимо реальных origin, `HTTP_BRIDGE_API.md` документирует несуществующий префикс `/api/v1`, delete_phrases трёт фразы без id, rate-limit общий на всех.
+- Скауты ядра/плагинов на момент отчёта не вернулись — их находки не включены.
+- Коммит 5daaccd запушен в public main.
