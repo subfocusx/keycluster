@@ -31,7 +31,7 @@ export class ModuleLifecycleManager {
       }
       // Normalize manifest so optional fields (dependencies, settingsSchema) are always defined.
       // Mutate in-place to preserve identity (some callers compare by reference).
-      const m = module.manifest as Record<string, unknown>;
+      const m = module.manifest as unknown as Record<string, unknown>;
       if (m.dependencies === undefined) m.dependencies = [];
       if (m.settingsSchema === undefined) m.settingsSchema = [];
       this.state.modules.set(module.manifest.id, module);

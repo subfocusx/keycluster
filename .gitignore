@@ -12,3 +12,5 @@ cov*.txt
 full-test.txt
 vitest_*.txt
 tsconfig.tsbuildinfo
+portable/
+dist/
