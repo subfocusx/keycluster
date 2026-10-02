@@ -73,3 +73,7 @@ portable/               # собранный keycluster.exe 19.3MB (коммит
 - Скаут Rust нашёл дополнительно (не чинено): SSRF-дыры в http.rs (IPv6-mapped bypass, DNS-rebinding), FK без ON DELETE (проекты со снапшотами неудаляемы), restore пишет `data="{}"` при чужой форме бэкапа, CORS `AllowOrigin::exact(localhost)` бьёт мимо реальных origin, `HTTP_BRIDGE_API.md` документирует несуществующий префикс `/api/v1`, delete_phrases трёт фразы без id, rate-limit общий на всех.
 - Скауты ядра/плагинов на момент отчёта не вернулись — их находки не включены.
 - Коммит 5daaccd запушен в public main.
+
+## Плагин-аудит 2026-10-02 (скаут ThoughtlessPlatypus)
+- Исправлено (коммит caec13e): multitool слот `context:group`→`context-menu:group` (панель была невидима) + хоткеи на короткие id (все 5 не работали из-за двойного префикса); убран мёртвый `unregisterExporter`; валидатор принимает `slots`-алиас (13 из 16 манифестов иначе невалидны); категория `seo` в типах; убраны протухшие EXCLUDED_PLUGIN_DIRS.
+- Не чинено: favorites — пустышка (init пуст, манифест врёт про phrase-row:actions); group-analysis/import-export без index.js — неустанавливаемы через UI; multitool multitool-папка vs id seo-multitool (не регистрируется через Vite/FS-пути); то же про source-параметр в module-loader (мёртвый API); PluginPreviewCard рендерит массив слотов через toString; HTTP_BRIDGE_API врёт про /api/v1.
