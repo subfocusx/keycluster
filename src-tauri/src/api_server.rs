@@ -310,10 +310,14 @@ async fn health() -> Json<serde_json::Value> {
     Json(serde_json::json!({ "status": "ok", "version": "0.3.0" }))
 }
 
-// ---------- /api/token ----------
+// ---------- /api/token (auth required: token rotation must not leak) ----------
 
-async fn get_token(State(state): State<ApiState>) -> Json<serde_json::Value> {
-    Json(serde_json::json!({ "token": state.token.get() }))
+async fn get_token(
+    State(state): State<ApiState>,
+    headers: HeaderMap,
+) -> Result<Json<serde_json::Value>, (StatusCode, &'static str)> {
+    check_auth(&headers, &state)?;
+    Ok(Json(serde_json::json!({ "token": state.token.get() })))
 }
 
 // ---------- /api/project?projectId=... ----------
@@ -731,7 +735,7 @@ async fn create_snapshot(
     let snapshot_str = serde_json::to_string(&snapshot_data)
         .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, "serialize"))?;
 
-    let checksum = crate::compute_sha256(&data_str);
+    let checksum = crate::compute_sha256(&snapshot_str);
 
     conn.execute(
         "INSERT INTO ProjectBackup (id, parentId, data, checksum, createdAt) VALUES (?1, ?2, ?3, ?4, ?5)",

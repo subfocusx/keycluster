@@ -58,27 +58,30 @@ describe('ExportDialog', () => {
     expect(screen.getByText('Экспорт данных')).toBeInTheDocument();
   });
 
-  it('should show template selector', () => {
+  it('should show template selector', async () => {
     renderDialog(ctx);
     expect(screen.getByText('Шаблон')).toBeInTheDocument();
-    expect(screen.getByText('Только фразы')).toBeInTheDocument();
-    expect(screen.getByText('Полный экспорт')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('combobox', { name: 'Шаблон экспорта' }));
+    expect(screen.getAllByText('Только фразы').length).toBeGreaterThanOrEqual(2);
+    expect(await screen.findByText('Полный экспорт')).toBeInTheDocument();
   });
 
-  it('should show format selector', () => {
+  it('should show format selector', async () => {
     renderDialog(ctx);
     expect(screen.getByText('Формат')).toBeInTheDocument();
-    expect(screen.getByText('CSV')).toBeInTheDocument();
-    expect(screen.getByText('TSV')).toBeInTheDocument();
-    expect(screen.getByText('JSON')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('combobox', { name: 'Формат экспорта' }));
+    expect(screen.getAllByText('CSV').length).toBeGreaterThanOrEqual(1);
+    expect(await screen.findByText('TSV')).toBeInTheDocument();
+    expect(await screen.findByText('JSON')).toBeInTheDocument();
   });
 
-  it('should show group selector for non-minus-words template', () => {
+  it('should show group selector for non-minus-words template', async () => {
     renderDialog(ctx);
     expect(screen.getByText('Группа')).toBeInTheDocument();
-    expect(screen.getByText('— Все группы —')).toBeInTheDocument();
-    expect(screen.getByText('Group 1')).toBeInTheDocument();
-    expect(screen.getByText('Group 2')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('combobox', { name: 'Группа для экспорта' }));
+    expect(screen.getAllByText('— Все группы —').length).toBeGreaterThanOrEqual(2);
+    expect(await screen.findByText('Group 1')).toBeInTheDocument();
+    expect(await screen.findByText('Group 2')).toBeInTheDocument();
   });
 
   it('should disable export button when phrase count is 0', () => {
@@ -101,10 +104,8 @@ describe('ExportDialog', () => {
 
   it('should show minus words count for minus-words template', async () => {
     renderDialog(ctx);
-    await userEvent.selectOptions(
-      screen.getByDisplayValue('Только фразы'),
-      'Минус-фразы',
-    );
+    await userEvent.click(screen.getByRole('combobox', { name: 'Шаблон экспорта' }));
+    await userEvent.click(await screen.findByText('Минус-фразы'));
     expect(screen.getByText(/Экспорт минус-фраз: 1/)).toBeInTheDocument();
   });
 
@@ -117,10 +118,8 @@ describe('ExportDialog', () => {
 
   it('should hide group selector for minus-words template', async () => {
     renderDialog(ctx);
-    await userEvent.selectOptions(
-      screen.getByDisplayValue('Только фразы'),
-      'Минус-фразы',
-    );
+    await userEvent.click(screen.getByRole('combobox', { name: 'Шаблон экспорта' }));
+    await userEvent.click(await screen.findByText('Минус-фразы'));
     expect(screen.queryByText('Группа')).not.toBeInTheDocument();
   });
 

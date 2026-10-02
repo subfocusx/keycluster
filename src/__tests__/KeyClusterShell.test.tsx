@@ -216,6 +216,10 @@ vi.mock('@/components/ModuleErrorBoundary', () => ({
 vi.mock('@/shell/useModuleCtx', () => ({
   useModuleCtx: () => ({ eventBus: {}, store: {} }),
 }));
+vi.mock('@/components/KCDialog', () => ({
+  useKCDialog: () => ({ confirm: () => Promise.resolve(true), prompt: () => Promise.resolve(null), alert: () => Promise.resolve() }),
+}));
+
 
 // ---- Helpers ----
 
@@ -324,14 +328,14 @@ describe('KeyClusterShell', () => {
       expect(selectSpy).toHaveBeenCalled();
     });
 
-    it('Delete calls moveToTrash for selected phrase', () => {
+    it('Delete calls moveToTrash for selected phrase', async () => {
       renderShell();
       act(() => { vi.runAllTimers(); });
       const state = mockUseAppStore.getState();
       state.selectedPhraseIds = new Set(['p1']);
       const trashSpy = state.moveToTrash;
 
-      act(() => { fireEvent.keyDown(window, { key: 'Delete' }); });
+      await act(async () => { fireEvent.keyDown(window, { key: 'Delete' }); });
       expect(trashSpy).toHaveBeenCalledWith(['p1']);
     });
 

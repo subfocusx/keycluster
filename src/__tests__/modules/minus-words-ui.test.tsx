@@ -7,8 +7,8 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MinusWordsPanel } from '@user-plugins/minus-words/components';
 import { useAppStore } from '@/plugin-sdk';
+import type { PluginContext } from '@/plugin-sdk';
 import { createEventBus } from '@/core/event-bus';
-
 function createMockCtx() {
   return {
     eventBus: { ...createEventBus(), emit: vi.fn() },
@@ -81,10 +81,9 @@ describe('MinusWordsPanel', () => {
   });
 
   it('should show search type selector', () => {
-    render(<MinusWordsPanel ctx={ctx as any} />);
-    expect(screen.getByText('Широкий поиск')).toBeInTheDocument();
-    expect(screen.getByText('По словам')).toBeInTheDocument();
-    expect(screen.getByText('Точное совпадение')).toBeInTheDocument();
+    render(<MinusWordsPanel ctx={ctx as unknown as PluginContext} />);
+    // Radix Select рендерит триггер без текста до открытия — проверяем наличие селекта по aria-label
+    expect(screen.getByRole('combobox', { name: 'Тип поиска' })).toBeInTheDocument();
   });
 
   it('should remove minus word when delete button is clicked', async () => {

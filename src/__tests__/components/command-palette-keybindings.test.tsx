@@ -26,9 +26,9 @@ describe('create Command Registry', () => {
     render(<CommandPalette open={true} onClose={vi.fn()} />);
 
     expect(screen.getByText('No Keybinding')).toBeInTheDocument();
-    // Built-in kbd elements: search bar "Esc" + footer hints (↑↓, ↵, Esc) = 4
+    // Built-in kbd elements: search bar "Esc" + footer hints (↑↓, ↵, Esc, F2, Ctrl+A, Del, Ctrl+Z) = 8
     const kbds = document.querySelectorAll('kbd');
-    expect(kbds.length).toBe(4);
+    expect(kbds.length).toBe(8);
     expect(screen.queryByText('Ctrl+X')).not.toBeInTheDocument();
   });
 
