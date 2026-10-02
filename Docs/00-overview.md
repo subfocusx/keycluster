@@ -61,3 +61,8 @@ portable/               # собранный keycluster.exe 19.3MB (коммит
 - lint: скрипт сломан — нет `eslint.config.js` (ESLint 9 требует новый формат)
 - tests: 2656 passed / 8 failed / 13 skipped (155 файлов). Падают 4 файла: `command-palette-keybindings` (счётчик kbd 8 vs 4), `KeyClusterShell` (Delete→moveToTrash не вызван), `export-dialog` (5 шт, тексты шаблонов), `minus-words-ui` (текст "Широкий поиск"). Характер — протухшие UI-ассёрты, не ядро.
 - Исправлен 1 файл: `src/core/module-runtime-lifecycle/lifecycle.ts`
+
+## Публикация 2026-10-02
+- Секретов/ключей/персданных в коде нет: AI только Ollama/LMStudio localhost, API-токен генерится в рантайме (UUID), захардкоженных `sk-/ghp-/AKIA` нет, `.env` нет
+- `portable/`, `dist/` добавлены в .gitignore (не пушатся)
+- Запушено в `subfocusx/keycluster` (main 96e603e), репозиторий переведён в public
