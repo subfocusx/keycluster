@@ -24,8 +24,9 @@ enableMapSet();
 
 import { createGroupSlice } from './store/groupSlice';
 import type { GroupSlice } from './store/groupSlice';
-import { createPhraseSlice } from './store/phraseSlice';
+import { createPhraseSlice, rebuildPhraseMap } from './store/phraseSlice';
 import type { PhraseSlice } from './store/phraseSlice';
+import type { Phrase } from './types';
 import { createMinusWordSlice } from './store/minusWordSlice';
 import type { MinusWordSlice } from './store/minusWordSlice';
 import { createSelectionSlice } from './store/selectionSlice';
@@ -74,10 +75,15 @@ export const useAppStore = create<AppStore>()(
       merge: (persisted: unknown, current: AppStore) => {
         const p = persisted as Partial<AppStore> | null;
         if (!p || typeof p !== 'object') return current;
+        // phraseMap не персистится (Map не сериализуем) — перестраиваем из phrases,
+        // иначе все операции по индексу (updatePhrase, togglePhraseStar, addTag) — no-op.
+        const phrases = p.phrases ?? current.phrases;
+        const phraseMap = rebuildPhraseMap(phrases as unknown as Phrase[]);
         return {
           ...current,
           groups: p.groups ?? current.groups,
-          phrases: p.phrases ?? current.phrases,
+          phrases,
+          phraseMap,
           minusWords: p.minusWords ?? current.minusWords,
           minusWordGroups: p.minusWordGroups ?? current.minusWordGroups,
           ui: {
@@ -111,8 +117,8 @@ export function initContextKeysSync() {
       ck.setKey('hasSelection', s.selectedPhraseIds.size > 0);
       ck.setKey('hasActiveGroup', s.activeGroupId !== null);
       ck.setKey('phraseCount', s.phrases.length);
-      ck.setKey('groupCount', s.groups.filter(g => !g.isTrash).length);
-    });
+      ck.setKey('groupCount', s.groups.filter((g) => !g.isTrash).length);
+    }).catch(() => { /* context-keys optional */ });
   };
 
   useAppStore.subscribe(sync);
@@ -185,12 +191,10 @@ export function createStoreAccess(): StoreAccess {
       const value = settingsState.getModuleSetting(moduleId, key);
       if (value !== undefined) return value;
       try {
-        const rt = _runtimeRef?.getRuntime?.();
-        if (rt) {
-          const mod = (rt as any).getModule(moduleId);
-          const field = mod?.manifest.settingsSchema?.find((f: SettingFieldSchema) => f.key === key);
-          if (field) return field.default;
-        }
+        const rt = _runtimeRef?.getRuntime?.() as { getModule?: (id: string) => { manifest: { settingsSchema?: SettingFieldSchema[] } } | undefined } | undefined;
+        const mod = rt?.getModule?.(moduleId);
+        const field = mod?.manifest.settingsSchema?.find((f) => f.key === key);
+        if (field) return field.default;
       } catch { /* runtime may not be available during tests */ }
       return undefined;
     },

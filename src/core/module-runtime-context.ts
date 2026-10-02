@@ -3,7 +3,7 @@ import type { PluginContext, LifecycleEvent, LifecycleHook, RegisteredLifecycleH
 import { PLUGIN_API_VERSION } from './plugin-api';
 import { keybindingManager } from './keybinding-manager';
 import { getCommandRegistry } from './command-registry';
-import type { RuntimeState, SlotOptions } from './module-runtime-types';
+import type { RuntimeState, SlotOptions, TimeoutId, IntervalId } from './module-runtime-types';
 import { createPlatformAPI } from './platform-api';
 import { labelRegistry } from './label-registry';
 import { pluginRegistry } from './plugin-registry';
@@ -228,8 +228,8 @@ export function buildPluginContext(
       }
     },
 
-    setTimeout(fn: () => void, ms: number): ReturnType<typeof setTimeout> {
-      const id = globalThis.setTimeout(() => {
+    setTimeout(fn: () => void, ms: number): TimeoutId {
+      const id: TimeoutId = globalThis.setTimeout(() => {
         getHandle(state, moduleId).timers.delete(id);
         fn();
       }, ms);
@@ -237,11 +237,10 @@ export function buildPluginContext(
       return id;
     },
 
-    setInterval(fn: () => void, ms: number): ReturnType<typeof setInterval> {
-      const id = globalThis.setInterval(() => {
-        getHandle(state, moduleId).intervals.delete(id);
-        fn();
-      }, ms);
+    setInterval(fn: () => void, ms: number): IntervalId {
+      // НЕ удаляем id из handle.intervals на тике: интервал повторяющийся,
+      // его должен снимать hardStopModule/clearInterval при destroy/disable.
+      const id = globalThis.setInterval(fn, ms);
       getHandle(state, moduleId).intervals.add(id);
       return id;
     },

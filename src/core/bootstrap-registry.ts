@@ -9,10 +9,12 @@ export function orchestrateRegistry(knownIds: string[], allUserPluginIds: string
   pluginRegistry.load();
   LogStore._log('debug', 'system', `Registry loaded: ${pluginRegistry.getAll().length} records`);
 
+  // НЕ включаем принудительно выключенные пользователем плагины:
+  // запись rec.enabled=false — осознанный выбор, переживает рестарт.
   for (const id of allUserPluginIds) {
     const rec = pluginRegistry.getAll().find(r => r.id === id);
-    if (rec && !rec.enabled) {
-      pluginRegistry.enable(id);
+    if (!rec) {
+      pluginRegistry.install(id, 'user');
     }
   }
 

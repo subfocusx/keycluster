@@ -36,9 +36,12 @@ export interface ModuleStatus {
   uiContributionsCount?: number;
 }
 
+export type TimeoutId = ReturnType<typeof setTimeout>;
+export type IntervalId = ReturnType<typeof setInterval>;
+
 export interface ModuleRuntimeHandle {
-  timers: Set<ReturnType<typeof setTimeout>>;
-  intervals: Set<ReturnType<typeof setInterval>>;
+  timers: Set<TimeoutId>;
+  intervals: Set<IntervalId>;
   unsubscribers: Set<() => void>;
   cleanupFns: Array<() => void>;
 }
