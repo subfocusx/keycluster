@@ -77,3 +77,7 @@ portable/               # собранный keycluster.exe 19.3MB (коммит
 ## Плагин-аудит 2026-10-02 (скаут ThoughtlessPlatypus)
 - Исправлено (коммит caec13e): multitool слот `context:group`→`context-menu:group` (панель была невидима) + хоткеи на короткие id (все 5 не работали из-за двойного префикса); убран мёртвый `unregisterExporter`; валидатор принимает `slots`-алиас (13 из 16 манифестов иначе невалидны); категория `seo` в типах; убраны протухшие EXCLUDED_PLUGIN_DIRS.
 - Не чинено: favorites — пустышка (init пуст, манифест врёт про phrase-row:actions); group-analysis/import-export без index.js — неустанавливаемы через UI; multitool multitool-папка vs id seo-multitool (не регистрируется через Vite/FS-пути); то же про source-параметр в module-loader (мёртвый API); PluginPreviewCard рендерит массив слотов через toString; HTTP_BRIDGE_API врёт про /api/v1.
+
+## Ядро-аудит 2026-10-02 (скаут PersonalGorilla)
+- Исправлено (коммит 187caa0): `store.ts` merge перестраивает `phraseMap` (после перезапуска все операции по id были no-op); `setInterval` больше не вычёркивает себя из handle (таймеры жили после destroy модуля); `bootstrap-registry` не включает принудительно выключенные плагины; `getModule` без `as any`; `.catch` на context-keys sync; `TimeoutId/IntervalId` именованные типы.
+- Не чинено: двойной initAll в bootstrap; топосорт роняет A при цикле A↔B; contexts.set до init (мёртвые записи); save-queue retry-двойники; serialize теряет clusterQuality/intent/starredAt/mwGroupId; loadModule кэширует вместо reload; discovery в проде purge'ит builtin.
