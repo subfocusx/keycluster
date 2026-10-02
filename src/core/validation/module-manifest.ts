@@ -39,7 +39,12 @@ export function validateModuleManifest(raw: unknown, moduleId: string): asserts 
     );
   }
 
-  if (!Array.isArray(m.slot)) {
+  // Accept both `slot` (canonical) and `slots` (used by most user-plugins manifests)
+  if (Array.isArray(m.slot)) {
+    // canonical — ok
+  } else if (Array.isArray(m.slots)) {
+    m.slot = m.slots;
+  } else {
     throw new ModuleLoadError(
       moduleId,
       `Invalid manifest: "slot" must be an array`,

@@ -17,7 +17,7 @@ const plugin = {
     description: 'Очистка и фильтрация ключевых фраз: удаление дублей, пустых строк, спецсимволов; фильтры по длине, количеству слов, числам и вопросам',
     category: 'seo',
     icon: 'search',
-    slot: ['ribbon:tools', 'context:group'],
+    slot: ['ribbon:tools', 'context-menu:group'],
   },
 
   init(ctx: any) {
@@ -47,7 +47,7 @@ const plugin = {
     });
 
     ctx.registerUI({
-      slot: 'context:group',
+      slot: 'context-menu:group',
       label: 'SEO Multitool',
       icon: 'search',
       component: SeoMultitoolPanel,
@@ -103,11 +103,11 @@ const plugin = {
     ctx.registerCommand('removeEmpty', () => handlerRefs.removeEmpty());
 
     // --- Task 5: Keybindings ---
-    ctx.registerKeybinding('Ctrl+Shift+D', 'seo-multitool:deduplicate');
-    ctx.registerKeybinding('Ctrl+Shift+C', 'seo-multitool:cleanChars');
-    ctx.registerKeybinding('Ctrl+Shift+T', 'seo-multitool:trim');
-    ctx.registerKeybinding('Ctrl+Shift+L', 'seo-multitool:lowercase');
-    ctx.registerKeybinding('Ctrl+Shift+E', 'seo-multitool:removeEmpty');
+    ctx.registerKeybinding('Ctrl+Shift+D', 'deduplicate');
+    ctx.registerKeybinding('Ctrl+Shift+C', 'cleanChars');
+    ctx.registerKeybinding('Ctrl+Shift+T', 'trim');
+    ctx.registerKeybinding('Ctrl+Shift+L', 'lowercase');
+    ctx.registerKeybinding('Ctrl+Shift+E', 'removeEmpty');
 
     // --- Task 5: Register all filters in host ---
     for (const filter of filterRegistry.getAll()) {
@@ -163,9 +163,7 @@ const plugin = {
   },
 
   destroy() {
-    // --- Task 6: Unregister exporters via ctx ---
-    try { _pluginCtx?.unregisterExporter?.('seo-multitool-txt'); } catch {}
-    try { _pluginCtx?.unregisterExporter?.('seo-multitool-csv'); } catch {}
+    // Exporters auto-unregister via runtime cleanupFns — nothing manual needed.
   },
 };
 

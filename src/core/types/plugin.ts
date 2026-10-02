@@ -79,7 +79,7 @@ export interface ModuleManifest {
   version: string;
   description: string;
   icon?: string;
-  category?: 'algorithms' | 'data' | 'analysis' | 'system' | 'custom';
+  category?: 'algorithms' | 'data' | 'analysis' | 'system' | 'custom' | 'seo';
   dependencies?: string[];
   entry?: string;
   slot: UISlot[];
@@ -97,7 +97,7 @@ export interface InternalModuleManifest {
   version: string;
   description: string;
   icon?: string;
-  category?: 'algorithms' | 'data' | 'analysis' | 'system' | 'custom';
+  category?: 'algorithms' | 'data' | 'analysis' | 'system' | 'custom' | 'seo';
   dependencies: string[];
   entry?: string;
   slot: UISlot[];

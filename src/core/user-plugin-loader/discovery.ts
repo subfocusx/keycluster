@@ -9,9 +9,8 @@ export interface UserPluginManifest {
   entry?: string;
 }
 
-export const EXCLUDED_PLUGIN_DIRS = new Set([
-  'my-first-plugin',
-  'group-notes',
+export const EXCLUDED_PLUGIN_DIRS = new Set<string>([
+  // исторически: 'my-first-plugin', 'group-notes' — каталогов нет в репо, список пуст
 ]);
 
 export const discovered = import.meta.glob('/user-plugins/**/index.ts');
