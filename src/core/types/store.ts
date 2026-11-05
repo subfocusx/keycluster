@@ -41,6 +41,10 @@ export interface UIState {
   columnLabels: Record<string, string>;
   columnColors: Record<string, string>;
   multigroupMode: boolean;
+  /** Панель групп: свёрнута ли, слева ли дерево, ширина */
+  groupsPanelCollapsed?: boolean;
+  groupsTreeOnLeft?: boolean;
+  groupsPanelWidth?: number;
 }
 
 export interface DevtoolsState {

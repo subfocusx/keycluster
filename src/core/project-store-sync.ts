@@ -33,6 +33,9 @@ export function extractProjectState(state: {
     theme: string;
     rightPanel: { width: number; open: boolean };
     leftPanel: { width: number; open: boolean; module: string | null };
+    groupsPanelCollapsed?: boolean;
+    groupsTreeOnLeft?: boolean;
+    groupsPanelWidth?: number;
   };
 }): ProjectState {
   return {
@@ -45,6 +48,10 @@ export function extractProjectState(state: {
       theme: state.ui.theme as any,
       rightPanel: { ...state.ui.rightPanel },
       leftPanel: { ...state.ui.leftPanel },
+      // Положение и состояние панели групп — часть проекта
+      groupsPanelCollapsed: state.ui.groupsPanelCollapsed,
+      groupsTreeOnLeft: state.ui.groupsTreeOnLeft,
+      groupsPanelWidth: state.ui.groupsPanelWidth,
     },
   };
 }
