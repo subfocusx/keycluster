@@ -297,7 +297,9 @@ function GroupItem({ group, depth, ctx, isActive, phraseCount, minusCount, isSel
           {!group.isTrash && (
             <button
               className={`tree-minus${minusCount === 0 ? ' tree-minus-empty' : ''}`}
-              title={`Минус-фразы группы: ${minusCount}`}
+              title={minusCount > 0
+                ? `Минус-фразы группы: ${minusCount}`
+                : 'Минус-фразы группы: нет — нажмите, чтобы добавить'}
               onClick={(e) => {
                 e.stopPropagation();
                 useAppStore.getState().setActiveGroup(group.id);

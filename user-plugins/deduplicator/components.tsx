@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { useAppStore, Button, Label, Checkbox, useKCDialog } from 'plugin-sdk';
+import { useAppStore, Button, Label, Checkbox, useKCDialog, pluralize } from 'plugin-sdk';
 import type { PluginContext } from 'plugin-sdk';
 import { deduplicate } from './index';
 
@@ -19,7 +19,7 @@ export function DeduplicatorPanel({ ctx }: { ctx: PluginContext }) {
       const duplicateIds = deduplicate(phrases, { caseSensitive, withinGroup });
       let removed = 0;
       if (duplicateIds.length > 0) {
-        const ok = await kcDialog.confirm(`Удалить ${duplicateIds.length} дублей?`, { title: 'Дедупликация', confirmLabel: 'Удалить', variant: 'destructive' });
+        const ok = await kcDialog.confirm(`Удалить ${pluralize(duplicateIds.length, 'дубль', 'дубля', 'дублей')}?`, { title: 'Дедупликация', confirmLabel: 'Удалить', variant: 'destructive' });
         if (ok) {
           deletePhrases(duplicateIds);
           removed = duplicateIds.length;
@@ -60,7 +60,7 @@ export function DeduplicatorPanel({ ctx }: { ctx: PluginContext }) {
       {result && (
         <div className="text-sm text-[var(--text-secondary)]">
           {result.removed > 0
-            ? `Удалено дублей: ${result.removed} из ${result.total} фраз`
+            ? `Удалено ${pluralize(result.removed, 'дубль', 'дубля', 'дублей')} из ${result.total} фраз`
             : 'Дубликаты не найдены'}
         </div>
       )}

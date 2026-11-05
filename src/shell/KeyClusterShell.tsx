@@ -24,6 +24,7 @@ import { useKCDialog } from '@/components/KCDialog';
 import { ShellLayout, ShellLoadingScreen } from './ShellLayout';
 import { TabRouter } from './TabRouter';
 import { PanelManager, ResizablePanel, StatusBar } from './PanelManager';
+import { LeftOverlayPanel } from './left-overlay-panel';
 import { useModuleCtx } from './useModuleCtx';
 import { DevToolsPanel } from '@/modules/devtools/DevToolsPanel';
 import { ModuleGuard } from './ModuleGuard';
@@ -177,6 +178,9 @@ const [panelContribs, setPanelContribs] = useState<ModuleUIContribution[]>([]);
       mainContent={(() => {
         const mainContentNode = (
           <div className="flex-1 flex min-h-0 relative">
+            {/* Left overlay panel (AI, tool panels) — внутри рабочей области,
+                чтобы не перекрывать ленту с вкладками */}
+            <LeftOverlayPanel ctx={ctx} />
             {/* Workspace panel contributions (left side) */}
             {panelContribs.filter(c => c.component && c.order !== undefined && c.order < 0).map(c => {
               const Comp = c.component!;

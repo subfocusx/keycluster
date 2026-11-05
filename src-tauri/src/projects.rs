@@ -36,6 +36,7 @@ pub struct CreateProjectInput {
     pub phrases: Option<String>,
     pub phrase_count: Option<i64>,
     pub minus_words: Option<String>,
+    pub minus_word_groups: Option<String>,
     pub settings: Option<String>,
     pub ui_state: Option<String>,
     pub is_backup: Option<bool>,
@@ -50,6 +51,7 @@ pub struct UpdateProjectInput {
     pub phrases: Option<String>,
     pub phrase_count: Option<i64>,
     pub minus_words: Option<String>,
+    pub minus_word_groups: Option<String>,
     pub settings: Option<String>,
     pub ui_state: Option<String>,
 }
@@ -64,6 +66,9 @@ fn build_data(input: &CreateProjectInput) -> Result<String, String> {
     }
     if let Some(ref v) = input.minus_words {
         map.insert("minusWords".into(), serde_json::Value::String(v.clone()));
+    }
+    if let Some(ref v) = input.minus_word_groups {
+        map.insert("minusWordGroups".into(), serde_json::Value::String(v.clone()));
     }
     if let Some(ref v) = input.settings {
         map.insert("settings".into(), serde_json::Value::String(v.clone()));
@@ -88,6 +93,9 @@ fn build_update_data(input: &UpdateProjectInput) -> Result<String, String> {
     }
     if let Some(ref v) = input.minus_words {
         map.insert("minusWords".into(), serde_json::Value::String(v.clone()));
+    }
+    if let Some(ref v) = input.minus_word_groups {
+        map.insert("minusWordGroups".into(), serde_json::Value::String(v.clone()));
     }
     if let Some(ref v) = input.settings {
         map.insert("settings".into(), serde_json::Value::String(v.clone()));
@@ -282,6 +290,10 @@ pub fn restore_project(
         .get("minusWords")
         .and_then(|v| v.as_str())
         .map(|s| s.to_string());
+    let minus_word_groups = parsed
+        .get("minusWordGroups")
+        .and_then(|v| v.as_str())
+        .map(|s| s.to_string());
     let settings = parsed
         .get("settings")
         .and_then(|v| v.as_str())
@@ -302,6 +314,7 @@ pub fn restore_project(
         phrases,
         phrase_count: None,
         minus_words,
+        minus_word_groups,
         settings,
         ui_state,
     };

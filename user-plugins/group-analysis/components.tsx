@@ -4,7 +4,7 @@
 // ============================================================
 
 import type { PluginContext } from 'plugin-sdk';
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { useAppStore, AppEvents, useActiveGroupIds, Label, Checkbox, Slider } from 'plugin-sdk';
 import type { WordGroup } from './index';
 import { DEFAULT_STOP_WORDS_LIST, groupAnalysisSettings, groupByWords } from './index';
@@ -24,6 +24,7 @@ export function GroupAnalysisPanel({ ctx }: { ctx: PluginContext }) {
   const [synonymsText, setSynonymsText] = useState('');
   const [results, setResults] = useState<WordGroup[] | null>(null);
   const [isRunning, setIsRunning] = useState(false);
+  const resultsRef = useRef<HTMLDivElement | null>(null);
 
   const phrases = useAppStore(s => s.phrases);
   const activeGroupIds = useActiveGroupIds();
@@ -85,13 +86,23 @@ export function GroupAnalysisPanel({ ctx }: { ctx: PluginContext }) {
       const store = useAppStore.getState();
       const rootId = store.addGroup('Анализ групп', null);
       ctx.store.dispatch('toggleExpand', rootId);
-      for (const group of results) {
+
+      // A phrase can match several words, but a phrase lives in exactly ONE group.
+      // Assign it to the most specific (smallest) group, so broad words don't
+      // swallow the whole selection. Duplicating phrases here would pollute
+      // the table with copies of the same keyword.
+      const ordered = [...results].sort((a, b) => a.phrases.length - b.phrases.length);
+      const assigned = new Set<string>();
+
+      for (const group of ordered) {
         const groupId = store.addGroup(group.word, rootId);
-        ctx.store.dispatch('addPhrases', {
-          texts: group.phrases.map(p => p.text),
-          groupId,
-          extra: group.phrases.map(p => ({ frequency: p.frequency, kei: p.kei, cpc: p.cpc }))
-        });
+        const ids = group.phrases
+          .map(p => p.id)
+          .filter((id) => !assigned.has(id));
+        ids.forEach(id => assigned.add(id));
+        if (ids.length > 0) {
+          ctx.store.dispatch('movePhrases', { ids, targetGroupId: groupId });
+        }
       }
       ctx.store.dispatch('setActiveGroup', rootId);
     });
@@ -99,6 +110,14 @@ export function GroupAnalysisPanel({ ctx }: { ctx: PluginContext }) {
     ctx.eventBus.emit(AppEvents.PHRASES_CHANGED);
     setResults(null);
   }, [results, ctx]);
+
+  // После анализа показываем результаты — прокручиваем к ним, иначе они
+  // остаются за пределами видимой области панели.
+  useEffect(() => {
+    if (results && results.length > 0) {
+      resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }, [results]);
 
   const totalPhrasesInResults = results
     ? results.reduce((sum, g) => sum + g.phrases.length, 0)
@@ -110,7 +129,7 @@ export function GroupAnalysisPanel({ ctx }: { ctx: PluginContext }) {
 
           {/* Description */}
           <div className="text-[11px] text-[var(--kc-text-secondary)] leading-relaxed">
-            Группирует фразы по отдельным словам. Каждая группа — все фразы, содержащие данное слово. Одна фраза может быть в нескольких группах.
+            Группирует фразы по отдельным словам. Каждая группа — все фразы, содержащие данное слово. Фраза попадает в одну, самую специфичную группу.
           </div>
 
           <div className="h-px bg-[var(--kc-border-light)]" />
@@ -187,7 +206,7 @@ export function GroupAnalysisPanel({ ctx }: { ctx: PluginContext }) {
 
           {/* Results */}
           {results && results.length > 0 && (
-            <div className="space-y-3">
+            <div className="space-y-3" ref={resultsRef}>
               {/* Summary */}
               <div className="flex items-center gap-2 p-2 rounded-[3px] bg-[var(--kc-blue-light)] border border-[var(--kc-blue)] text-[12px] text-[var(--kc-blue)] min-w-0 overflow-hidden">
                 <MIcon name="check_circle" className="!text-[16px] shrink-0" />

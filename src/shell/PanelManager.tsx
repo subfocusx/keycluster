@@ -10,7 +10,6 @@
 import React, { useState, useEffect } from 'react';
 import { TrashModal } from '@/components/modals/TrashModal';
 import { ToolModal, PluginToolModal } from '@/components/modals/ToolModal';
-import { LeftOverlayPanel } from './left-overlay-panel';
 import { ModuleGuard } from './ModuleGuard';
 import { getRuntime, TOOL_REGISTRY, getEventBus } from '@/plugin-sdk';
 import type { ModuleUIContribution } from '@/plugin-sdk';
@@ -51,8 +50,6 @@ export function PanelManager({
 
   return (
     <>
-      <LeftOverlayPanel ctx={ctx} />
-
       {builtinContribs.filter(c => c.component).map(contrib => (
         <ModuleGuard key={contrib.moduleId} moduleId={contrib.moduleId!}>
           <ToolModal

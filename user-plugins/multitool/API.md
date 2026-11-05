@@ -1,5 +1,8 @@
 # KeyCluster Plugin API Reference
 
+> ⚠️ 2026-11-05: этот файл — копия `plugin-template/API.md`, а не документация
+> multitool-плагина. Специфичного описания multitool нет.
+
 Полный справочник по API хоста, доступному из плагинов через `ctx` и `plugin-sdk`.
 
 ## Содержание

@@ -223,6 +223,7 @@ export class SaveQueue {
           phrases: JSON.stringify(entry.state.phrases),
           phraseCount: entry.state.phrases.length,
           minusWords: JSON.stringify(entry.state.minusWords),
+          minusWordGroups: JSON.stringify(entry.state.minusWordGroups ?? []),
           settings: JSON.stringify(entry.state.settings),
           uiState: JSON.stringify(entry.state.uiState),
         });
@@ -237,6 +238,7 @@ export class SaveQueue {
             phrases: JSON.stringify(entry.state.phrases),
             phraseCount: entry.state.phrases.length,
             minusWords: JSON.stringify(entry.state.minusWords),
+            minusWordGroups: JSON.stringify(entry.state.minusWordGroups ?? []),
             settings: JSON.stringify(entry.state.settings),
             uiState: JSON.stringify(entry.state.uiState),
           });

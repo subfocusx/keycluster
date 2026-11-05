@@ -103,8 +103,27 @@ describe('Minus words bulk import via store', () => {
   });
 
   it('should not add duplicates via store', () => {
+    const first = useAppStore.getState().addMinusWord('word1', false, null, 'broad');
+    const second = useAppStore.getState().addMinusWord('word1', false, null, 'broad');
+    // The same text in the same scope must not create a second row —
+    // otherwise deleting one copy leaves the word "still in the list".
+    expect(first).toBe(true);
+    expect(second).toBe(false);
+    expect(useAppStore.getState().minusWords).toHaveLength(1);
+  });
+
+  it('should treat text as case-insensitive and space-normalized when checking duplicates', () => {
+    useAppStore.getState().addMinusWord('Купить  Автобус', false, null, 'broad');
+    const dup = useAppStore.getState().addMinusWord('купить автобус', false, null, 'broad');
+    expect(dup).toBe(false);
+    expect(useAppStore.getState().minusWords).toHaveLength(1);
+  });
+
+  it('should allow the same text in a different group scope', () => {
+    const groupId = useAppStore.getState().addGroup('G1');
     useAppStore.getState().addMinusWord('word1', false, null, 'broad');
-    useAppStore.getState().addMinusWord('word1', false, null, 'broad');
+    const added = useAppStore.getState().addMinusWord('word1', false, groupId, 'broad');
+    expect(added).toBe(true);
     expect(useAppStore.getState().minusWords).toHaveLength(2);
   });
 });

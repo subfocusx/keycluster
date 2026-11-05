@@ -55,9 +55,10 @@ export function ResizablePanel({
     >
       {children}
       <div
-        className="absolute left-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-[var(--accent-blue)] active:bg-[var(--accent-blue)] z-10"
+        className="panel-resize-handle absolute left-0 top-0 bottom-0 w-[3px] cursor-col-resize z-10"
         style={{ transform: 'translateX(-50%)' }}
         onMouseDown={handleMouseDown}
+        title="Потяните, чтобы изменить ширину панели"
       />
     </div>
   );

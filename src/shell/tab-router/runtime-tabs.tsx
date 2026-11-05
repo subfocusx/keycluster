@@ -1,6 +1,7 @@
 import React from 'react';
 import { useAppStore } from '@/plugin-sdk';
 import { MIcon } from '@/shell/shared-icon';
+import { pluralize } from '@/core/i18n/plural';
 import type { CustomTab } from '@/plugin-sdk';
 import { RegistryRibbonButtons } from './RegistryRibbonButtons';
 import { PluginRibbonButtons } from './PluginRibbonButtons';
@@ -68,7 +69,7 @@ function UndoRedoGroup() {
       <div className="ribbon-group-buttons">
         <button
           className="ribbon-btn"
-          title={`Отменить (Ctrl+Z)${undoStack.length > 0 ? ` · ${undoStack.length} шагов` : ''}`}
+          title={`Отменить (Ctrl+Z)${undoStack.length > 0 ? ` · ${pluralize(undoStack.length, 'шаг', 'шага', 'шагов')}` : ''}`}
           onClick={undo}
           disabled={undoStack.length === 0}
         >
@@ -79,7 +80,7 @@ function UndoRedoGroup() {
         </button>
         <button
           className="ribbon-btn"
-          title={`Повторить (Ctrl+Shift+Z)${redoStack.length > 0 ? ` · ${redoStack.length} шагов` : ''}`}
+          title={`Повторить (Ctrl+Shift+Z)${redoStack.length > 0 ? ` · ${pluralize(redoStack.length, 'шаг', 'шага', 'шагов')}` : ''}`}
           onClick={redo}
           disabled={redoStack.length === 0}
         >

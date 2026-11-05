@@ -14,3 +14,9 @@ vitest_*.txt
 tsconfig.tsbuildinfo
 portable/
 dist/
+
+# playwright MCP artifacts
+.playwright-mcp/
+
+# QA screenshots
+shots/

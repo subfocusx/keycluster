@@ -81,6 +81,7 @@ export function getCurrentProjectState(): ProjectState {
     groups: appState.groups,
     phrases: appState.phrases,
     minusWords: appState.minusWords,
+    minusWordGroups: appState.minusWordGroups,
     settings: settingsState.settings,
     ui: appState.ui,
   });

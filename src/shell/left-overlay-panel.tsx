@@ -70,7 +70,7 @@ export function LeftOverlayPanel({ ctx }: { ctx: any }) {
   const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!ui.leftPanel.open) return;
+    if (!ui?.leftPanel?.open) return;
 
     const handleClick = (e: MouseEvent) => {
       if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
@@ -86,14 +86,14 @@ export function LeftOverlayPanel({ ctx }: { ctx: any }) {
       clearTimeout(timer);
       document.removeEventListener('mousedown', handleClick);
     };
-  }, [ui.leftPanel.open, setLeftPanel]);
+  }, [ui?.leftPanel?.open, setLeftPanel]);
 
-  if (!ui.leftPanel.open) return null;
+  if (!ui?.leftPanel?.open) return null;
 
   return (
     <div
       ref={panelRef}
-      className="absolute top-0 left-0 z-30 w-[320px] h-[calc(100vh-22px)] bg-[var(--bg-surface)] border-r border-[var(--border)] shadow-lg flex flex-col"
+      className="absolute top-0 left-0 z-30 w-[320px] h-full bg-[var(--bg-surface)] border-r border-[var(--border)] shadow-lg flex flex-col"
     >
       <div className="flex items-center justify-between px-3 h-8 border-b border-[var(--border)] bg-[var(--bg-panel)] shrink-0">
         <span className="font-h2 text-[var(--text-primary)]">

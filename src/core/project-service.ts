@@ -102,6 +102,7 @@ export async function saveProjectAs(name: string): Promise<SaveResult> {
       name, version: PROJECT_FORMAT_VERSION,
       groups: JSON.stringify(state.groups), phrases: JSON.stringify(state.phrases),
       phraseCount: state.phrases.length, minusWords: JSON.stringify(state.minusWords),
+      minusWordGroups: JSON.stringify(state.minusWordGroups ?? []),
       settings: JSON.stringify(state.settings), uiState: JSON.stringify(state.uiState),
     });
     setCurrentProjectId(result.id);
@@ -168,6 +169,7 @@ async function executeLoadProject(projectId: string): Promise<LoadResult> {
 
     const migrationResult = migrateProject(record.version, {
       groups: record.groups, phrases: record.phrases, minusWords: record.minusWords,
+      minusWordGroups: record.minusWordGroups ?? [],
       settings: record.settings, uiState: record.uiState,
     });
     if (!migrationResult.success) {
@@ -221,6 +223,7 @@ async function executeLoadProject(projectId: string): Promise<LoadResult> {
           version: PROJECT_FORMAT_VERSION,
           groups: JSON.stringify(migratedState.groups), phrases: JSON.stringify(migratedState.phrases),
           minusWords: JSON.stringify(migratedState.minusWords),
+          minusWordGroups: JSON.stringify(migratedState.minusWordGroups ?? []),
           settings: JSON.stringify(migratedState.settings), uiState: JSON.stringify(migratedState.uiState),
         });
         log('saved migrated version back to DB: v%s → v%s', migrationResult.fromVersion, migrationResult.toVersion);
@@ -373,6 +376,7 @@ async function importProjectData(projectFile: import('./project-types').ProjectF
     name: projectFile.name, version: PROJECT_FORMAT_VERSION,
     groups: JSON.stringify(state.groups), phrases: JSON.stringify(state.phrases),
     phraseCount: state.phrases.length, minusWords: JSON.stringify(state.minusWords),
+    minusWordGroups: JSON.stringify(state.minusWordGroups ?? []),
     settings: JSON.stringify(state.settings), uiState: JSON.stringify(state.uiState),
   });
 

@@ -41,7 +41,8 @@ export function enableAutoSave(): void {
     if (
       state.groups !== prevState.groups ||
       state.phrases !== prevState.phrases ||
-      state.minusWords !== prevState.minusWords
+      state.minusWords !== prevState.minusWords ||
+      state.minusWordGroups !== prevState.minusWordGroups
     ) {
       setUnsavedChanges(true);
 
@@ -52,6 +53,7 @@ export function enableAutoSave(): void {
           groups: state.groups,
           phrases: state.phrases,
           minusWords: state.minusWords,
+          minusWordGroups: state.minusWordGroups,
           settings: settingsState.settings,
           ui: state.ui,
         });

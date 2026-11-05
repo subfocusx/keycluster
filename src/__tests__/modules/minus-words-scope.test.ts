@@ -47,4 +47,15 @@ describe('scopedMinusWords', () => {
     const result = scopedMinusWords([groupB], 'g1');
     expect(result).toEqual([]);
   });
+
+  it('includes words of ancestor groups (a parent word applies to the whole subtree)', () => {
+    const groups = [
+      { id: 'root', parentId: null },
+      { id: 'g1', parentId: 'root' },
+      { id: 'g2', parentId: 'g1' },
+    ];
+    const rootWord = makeMw('изкорня', 'root');
+    const result = scopedMinusWords([globalA, rootWord, groupA], 'g2', groups);
+    expect(result.map(mw => mw.text)).toEqual(['куплю', 'изкорня', 'срочно']);
+  });
 });

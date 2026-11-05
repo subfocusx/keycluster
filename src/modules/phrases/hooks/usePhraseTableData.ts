@@ -80,6 +80,12 @@ export function usePhraseTableData(
     return result;
   }, [phrases, activeGroupIds, groups, S.searchQuery, S.showStarredOnly, S.labelFilter, S.tagFilter, passesColumnFilters]);
 
+  /** Число фраз в текущей области (без учёта фильтров) — для «показано N из M» */
+  const scopeTotal = useMemo(() => {
+    const trashGroupId = groups.find(g => g.isTrash)?.id;
+    return phrases.filter(p => (trashGroupId ? p.groupId !== trashGroupId : true) && activeGroupIds.has(p.groupId)).length;
+  }, [phrases, activeGroupIds, groups]);
+
   const sortedPhrases = useMemo(() => {
     return filteredPhrases.slice().sort((a, b) => {
       const av = a[S.sortField as keyof Phrase];
@@ -124,10 +130,16 @@ export function usePhraseTableData(
   }, [minusWords]);
 
   const handleWordClick = (word: string) => {
-    const lowerWord = word.toLowerCase();
-    if (broadMinusTextSet.has(lowerWord)) {
-      const existingMW = minusWords.find(mw => mw.text.toLowerCase() === lowerWord && !mw.isExact && mw.searchType === 'broad');
-      if (existingMW) removeMinusWord(existingMW.id);
+    const lowerWord = word.trim().toLowerCase().replace(/\s+/g, ' ');
+    const scopeGroupId = activeGroupId ?? null;
+    // One text = one minus word per scope (the list rejects duplicates) —
+    // clicking a word that is already in the list removes it.
+    const existing = minusWords.filter(mw =>
+      mw.text.trim().toLowerCase().replace(/\s+/g, ' ') === lowerWord &&
+      (mw.groupId ?? null) === scopeGroupId
+    );
+    if (existing.length > 0) {
+      for (const mw of existing) removeMinusWord(mw.id);
     } else {
       addMinusWord(word, false, activeGroupId, 'broad');
     }
@@ -176,7 +188,7 @@ export function usePhraseTableData(
 
   return {
     minusWordTexts, passesColumnFilters, activeGroupIds,
-    filteredPhrases, sortedPhrases, allTags,
+    filteredPhrases, sortedPhrases, allTags, scopeTotal,
     handleSort, activeFilterCount,
     broadMinusTextSet, handleWordClick, handlePhraseClick,
     getGroupName, getGroupColor,
