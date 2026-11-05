@@ -199,6 +199,12 @@ export function matchPhrasesByMinusWords(
 }
 
 export function createMinusWordSlice(set: any, get: any) {
+  /** Название папки минус-фраз по id — для подписей в истории изменений. */
+  const folderName = (id: KCID | null | undefined): string => {
+    if (!id) return '';
+    return (get().minusWordGroups as MinusWordGroup[]).find((g) => g.id === id)?.name ?? '';
+  };
+
   return {
     minusWords: [] as MinusWord[],
     minusWordGroups: [] as MinusWordGroup[],
@@ -208,36 +214,49 @@ export function createMinusWordSlice(set: any, get: any) {
       const key = minusWordKey({ text: trimmed, groupId });
       const existing = (get().minusWords as MinusWord[]).find(mw => minusWordKey(mw) === key);
       if (existing) return false; // duplicate — keep the list free of identical rows
-      get().pushUndo();
+      get().pushUndo(`Добавление минус-фразы «${trimmed}»`);
       set((s: any) => ({
         minusWords: [...s.minusWords, { id: uuid(), text: trimmed, isExact, groupId, searchType, createdAt: Date.now(), mwGroupId }],
       }));
       return true;
     },
     removeMinusWord: (id: KCID) => {
-      get().pushUndo();
+      const text = (get().minusWords as MinusWord[]).find((mw) => mw.id === id)?.text ?? '';
+      get().pushUndo(text ? `Удаление минус-фразы «${text}»` : 'Удаление минус-фразы');
       set((s: any) => ({ minusWords: s.minusWords.filter((mw: MinusWord) => mw.id !== id) }));
     },
     setMinusWordMwGroup: (mwId: KCID, mwGroupId: KCID | null) => {
-      get().pushUndo();
+      const text = (get().minusWords as MinusWord[]).find((mw) => mw.id === mwId)?.text ?? '';
+      const currentFolder = folderName((get().minusWords as MinusWord[]).find((mw) => mw.id === mwId)?.mwGroupId);
+      const targetFolder = folderName(mwGroupId);
+      let label: string;
+      if (targetFolder) {
+        label = text ? `Перенос минус-фразы «${text}» в «${targetFolder}»` : 'Перенос минус-фразы в папку';
+      } else if (currentFolder) {
+        label = text ? `Перенос минус-фразы «${text}» из «${currentFolder}»` : 'Перенос минус-фразы из папки';
+      } else {
+        label = 'Перенос минус-фразы';
+      }
+      get().pushUndo(label);
       set((s: any) => ({
         minusWords: s.minusWords.map((mw: MinusWord) => mw.id === mwId ? { ...mw, mwGroupId } : mw),
       }));
     },
     createMinusWordGroup: (name: string) => {
-      get().pushUndo();
+      get().pushUndo(`Добавление папки минус-фраз «${name}»`);
       const id = uuid();
       set((s: any) => ({ minusWordGroups: [...s.minusWordGroups, { id, name, createdAt: Date.now() }] }));
       return id;
     },
     renameMinusWordGroup: (id: KCID, name: string) => {
-      get().pushUndo();
+      get().pushUndo(`Переименование папки минус-фраз «${name}»`);
       set((s: any) => ({
         minusWordGroups: s.minusWordGroups.map((g: MinusWordGroup) => g.id === id ? { ...g, name } : g),
       }));
     },
     deleteMinusWordGroup: (id: KCID) => {
-      get().pushUndo();
+      const name = folderName(id);
+      get().pushUndo(name ? `Удаление папки минус-фраз «${name}»` : 'Удаление папки минус-фраз');
       set((s: any) => ({
         minusWordGroups: s.minusWordGroups.filter((g: MinusWordGroup) => g.id !== id),
         minusWords: s.minusWords.map((mw: MinusWord) => mw.mwGroupId === id ? { ...mw, mwGroupId: null } : mw),

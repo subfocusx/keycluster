@@ -7,6 +7,13 @@ import type { Group, KCID } from '../types';
 import { LogStore } from '../logging/LogStore';
 import { collectManyWithDescendants, buildChildrenMap, collectWithDescendants } from '@/core/utils/group-tree';
 import { rebuildPhraseMap } from './phraseSlice';
+import { pluralize } from '../i18n/plural';
+
+/** Название группы по id — для человекочитаемых подписей в истории изменений. */
+function groupName(groups: Group[], id: KCID | null | undefined): string {
+  if (!id) return '';
+  return groups.find((g) => g.id === id)?.name ?? '';
+}
 
 export interface GroupSlice {
   groups: Group[];
@@ -29,14 +36,14 @@ export function createGroupSlice(set: any, get: any) {
   return {
     groups: [] as Group[],
     addGroup: (name: string, parentId: KCID | null = null) => {
-      get().pushUndo();
+      get().pushUndo(`Добавление группы «${name}»`);
       const id = uuid();
       set((s: any) => ({ groups: [...s.groups, { id, name, parentId, isExpanded: true, isTrash: false, createdAt: Date.now() }] }));
       LogStore._log('info', 'groups', `Group added: "${name}"`, { id, parentId });
       return id;
     },
     addGroupFromList: (names: string[], parentId: KCID | null = null) => {
-      get().pushUndo();
+      get().pushUndo(`Добавление ${pluralize(names.length, 'группы', 'групп', 'групп')} из списка`);
       const ids: KCID[] = [];
       const newGroups: Group[] = names.map(name => {
         const id = uuid();
@@ -48,12 +55,13 @@ export function createGroupSlice(set: any, get: any) {
       return ids;
     },
     renameGroup: (id: KCID, name: string) => {
-      get().pushUndo();
+      get().pushUndo(`Переименование группы «${name}»`);
       set((s: any) => ({ groups: s.groups.map((g: Group) => g.id === id ? { ...g, name } : g) }));
       LogStore._log('debug', 'groups', `Group renamed to "${name}"`, { id });
     },
     deleteGroup: (id: KCID) => {
-      get().pushUndo();
+      const groupLabel = groupName(get().groups, id);
+      get().pushUndo(groupLabel ? `Удаление группы «${groupLabel}»` : 'Удаление группы');
       const state = get();
       const toDelete = collectManyWithDescendants([id], state.groups);
       LogStore._log('info', 'groups', `Group deleted: ${id} (${toDelete.size} sub-groups)`, { id, deletedIds: Array.from(toDelete) });
@@ -66,13 +74,17 @@ export function createGroupSlice(set: any, get: any) {
       });
     },
     moveGroup: (id: KCID, newParentId: KCID | null) => {
-      get().pushUndo();
+      const groups = get().groups;
+      const name = groupName(groups, id);
+      const parentName = groupName(groups, newParentId);
+      const target = parentName ? `в «${parentName}»` : 'в корень';
+      get().pushUndo(name ? `Перенос группы «${name}» ${target}` : `Перенос группы ${target}`);
       set((s: any) => ({
         groups: s.groups.map((g: Group) => g.id === id ? { ...g, parentId: newParentId } : g),
       }));
     },
     deleteGroups: (ids: KCID[]) => {
-      get().pushUndo();
+      get().pushUndo(`Удаление ${pluralize(ids.length, 'группы', 'групп', 'групп')}`);
       const state = get();
       const toDelete = collectManyWithDescendants(ids, state.groups);
       LogStore._log('info', 'groups', `${ids.length} groups deleted (${toDelete.size} total)`, { ids, deletedIds: Array.from(toDelete) });
@@ -92,7 +104,8 @@ export function createGroupSlice(set: any, get: any) {
       const idSet = new Set(ids);
 
       if (!newParentId) {
-        get().pushUndo();
+        const parentLabel = `Перенос ${pluralize(ids.length, 'группы', 'групп', 'групп')} в корень`;
+        get().pushUndo(parentLabel);
         set((draft: any) => {
           draft.groups = draft.groups.map((g: Group) => idSet.has(g.id) ? { ...g, parentId: null } : g);
         });
@@ -109,7 +122,12 @@ export function createGroupSlice(set: any, get: any) {
         }
       }
 
-      get().pushUndo();
+      const parentName = groupName(state.groups, newParentId);
+      get().pushUndo(
+        parentName
+          ? `Перенос ${pluralize(ids.length, 'группы', 'групп', 'групп')} в «${parentName}»`
+          : `Перенос ${pluralize(ids.length, 'группы', 'групп', 'групп')} в корень`,
+      );
       set((draft: any) => {
         draft.groups = draft.groups.map((g: Group) => idSet.has(g.id) ? { ...g, parentId: newParentId } : g);
       });
@@ -123,11 +141,12 @@ export function createGroupSlice(set: any, get: any) {
       }));
     },
     setGroupColor: (id: KCID, color: string) => {
-      get().pushUndo();
+      const name = groupName(get().groups, id);
+      get().pushUndo(name ? `Изменение цвета группы «${name}»` : 'Изменение цвета группы');
       set((s: any) => ({ groups: s.groups.map((g: Group) => g.id === id ? { ...g, color } : g) }));
     },
     setGroupsColor: (ids: KCID[], color: string) => {
-      get().pushUndo();
+      get().pushUndo(`Изменение цвета ${pluralize(ids.length, 'группы', 'групп', 'групп')}`);
       const idSet = new Set(ids);
       set((s: any) => ({
         groups: s.groups.map((g: Group) =>
@@ -136,7 +155,8 @@ export function createGroupSlice(set: any, get: any) {
       }));
     },
     setGroupNotes: (id: KCID, notes: string) => {
-      get().pushUndo();
+      const name = groupName(get().groups, id);
+      get().pushUndo(name ? `Добавление заметки к группе «${name}»` : 'Добавление заметки к группе');
       set((s: any) => ({ groups: s.groups.map((g: Group) => g.id === id ? { ...g, notes } : g) }));
     },
     setGroupQuality: (id: KCID, quality: { score: number; reason: string; updatedAt: number } | null) => set((s: any) => ({
