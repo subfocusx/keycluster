@@ -362,6 +362,37 @@ describe('GroupAnalysisPanel — UI', () => {
     expect(screen.getByText('samsung')).toBeInTheDocument();
   });
 
+  it('GA7: "Создать структуру" переносит фразы, а не создаёт их копии', async () => {
+    const store = useAppStore.getState();
+    const gid = store.addGroup('G1');
+    store.addPhrases(['купить телефон', 'телефон samsung', 'купить samsung'], gid);
+
+    render(<GroupAnalysisPanel ctx={ctx as any} />);
+    await userEvent.click(screen.getByText(/Анализировать/));
+    await userEvent.click(screen.getByText('Создать структуру'));
+
+    // batchOperation оборачивает реальные действия — выполняем его,
+    // чтобы увидеть вложенные dispatch-вызовы
+    const dispatchMock = ctx.store.dispatch as ReturnType<typeof vi.fn>;
+    const batchCall = dispatchMock.mock.calls.find((c: unknown[]) => c[0] === 'batchOperation');
+    expect(batchCall).toBeTruthy();
+    dispatchMock.mockClear();
+    (batchCall![1] as () => void)();
+
+    const dispatchCalls = dispatchMock.mock.calls;
+    const dispatched = dispatchCalls.map((c: unknown[]) => c[0]);
+
+    // Фразы должны ПЕРЕНОСИТЬСЯ (movePhrases), а не копироваться (addPhrases)
+    expect(dispatched).toContain('movePhrases');
+    expect(dispatched).not.toContain('addPhrases');
+
+    // Каждая фраза переносится ровно один раз — копий не появляется
+    const moveCalls = dispatchCalls.filter((c: unknown[]) => c[0] === 'movePhrases');
+    const movedIds = moveCalls.flatMap((c: unknown[]) => (c[1] as { ids: string[] }).ids);
+    expect(movedIds.length).toBe(new Set(movedIds).size);
+    expect(movedIds.length).toBe(3);
+  });
+
   it('does not call createStructure when results is null', async () => {
     const store = useAppStore.getState();
     const gid = store.addGroup('G1');

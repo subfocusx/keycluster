@@ -2,8 +2,21 @@ import { v4 as uuid } from 'uuid';
 import type { KCID, UIState } from '../types';
 import { rebuildPhraseMap } from './phraseSlice';
 
+/**
+ * Дополнительные настройки панели групп.
+ * Поля опциональные — старые сохранённые проекты/настройки остаются валидными.
+ */
+export interface GroupsPanelUiState {
+  /** Панель групп свёрнута в узкую полосу */
+  groupsPanelCollapsed?: boolean;
+  /** Дерево групп перенесено в левую часть рабочей области */
+  groupsTreeOnLeft?: boolean;
+  /** Ширина панели групп (px) */
+  groupsPanelWidth?: number;
+}
+
 export interface UISlice {
-  ui: UIState;
+  ui: UIState & GroupsPanelUiState;
   clusteringResults: Map<string, any[]> | null;
   setLeftPanel: (open: boolean, module?: string | null) => void;
   setRightPanel: (open: boolean) => void;
@@ -20,6 +33,9 @@ export interface UISlice {
   setColumnColor: (colKey: string, color: string) => void;
   resetColumnSettings: () => void;
   setMultigroupMode: (enabled: boolean) => void;
+  setGroupsPanelCollapsed: (collapsed: boolean) => void;
+  setGroupsTreeOnLeft: (treeOnLeft: boolean) => void;
+  setGroupsPanelWidth: (width: number) => void;
   setClusteringResults: (results: Map<string, any[]> | null) => void;
   applyClusteringResults: () => void;
 }
@@ -40,7 +56,10 @@ export function createUISlice(set: any, get: any) {
       columnLabels: {} as Record<string, string>,
       columnColors: {} as Record<string, string>,
       multigroupMode: false,
-    } as UIState,
+      groupsPanelCollapsed: false,
+      groupsTreeOnLeft: false,
+      groupsPanelWidth: 280,
+    } as UIState & GroupsPanelUiState,
     setLeftPanel: (open: boolean, module: string | null = null) => set((s: any) => ({
       ui: { ...s.ui, leftPanel: { ...s.ui.leftPanel, open, module: module ?? s.ui.leftPanel.module } },
     })),
@@ -98,6 +117,15 @@ export function createUISlice(set: any, get: any) {
         draft.selectedGroupIds = new Set();
       }
     }),
+    setGroupsPanelCollapsed: (collapsed: boolean) => set((s: any) => ({
+      ui: { ...s.ui, groupsPanelCollapsed: collapsed },
+    })),
+    setGroupsTreeOnLeft: (treeOnLeft: boolean) => set((s: any) => ({
+      ui: { ...s.ui, groupsTreeOnLeft: treeOnLeft },
+    })),
+    setGroupsPanelWidth: (width: number) => set((s: any) => ({
+      ui: { ...s.ui, groupsPanelWidth: Math.max(180, Math.min(500, width)) },
+    })),
     setClusteringResults: (results: Map<string, any[]> | null) => set({ clusteringResults: results }),
     applyClusteringResults: () => {
       const state = get();

@@ -148,7 +148,7 @@ describe('TrashModal', () => {
     await userEvent.click(deselectBtn);
 
     // "Восстановить" should show no count
-    expect(screen.getByText('Восстановить ()')).toBeInTheDocument();
+    expect(screen.getByText(/^Восстановить$/)).toBeInTheDocument();
   });
 
   it('restore button calls restoreFromTrash and emits event', async () => {

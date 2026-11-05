@@ -115,6 +115,7 @@ describe('ipcTransport.getProject', () => {
       groups: [{ id: 'g1', name: 'Group 1' }],
       phrases: [{ id: 'p1', text: 'hello' }],
       minusWords: ['bad'],
+      minusWordGroups: [],
       settings: { theme: 'dark' },
       uiState: { theme: 'dark' },
       isBackup: false,

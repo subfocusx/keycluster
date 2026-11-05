@@ -77,8 +77,8 @@ export function MinusWordsPanel({ ctx }: { ctx: PluginContext }) {
   );
 
   const visibleMinusWords = useMemo(
-    () => scopedMinusWords(minusWords, targetGroupId),
-    [minusWords, targetGroupId],
+    () => scopedMinusWords(minusWords, targetGroupId, groups),
+    [minusWords, targetGroupId, groups],
   );
 
   const filteredMinusWords = useMemo(() => {
@@ -114,14 +114,15 @@ export function MinusWordsPanel({ ctx }: { ctx: PluginContext }) {
 
   const moveSelectedToGroup = (targetMwGroupId: KCID | null) => {
     for (const id of selectedMwIds) setMinusWordMwGroup(id, targetMwGroupId);
+    if (targetMwGroupId) setExpandedGroups(prev => new Set(prev).add(targetMwGroupId));
     setSelectedMwIds(new Set());
   };
 
-  const allMwSelected = visibleMinusWords.length > 0 && selectedMwIds.size === visibleMinusWords.length;
+  const allMwSelected = filteredMinusWords.length > 0 && filteredMinusWords.every(mw => selectedMwIds.has(mw.id));
 
   const toggleSelectAllMw = () => {
     if (allMwSelected) setSelectedMwIds(new Set());
-    else setSelectedMwIds(new Set(visibleMinusWords.map(mw => mw.id)));
+    else setSelectedMwIds(new Set(filteredMinusWords.map(mw => mw.id)));
   };
 
   const copyMwGroupToClipboard = async (groupId: KCID | null) => {
@@ -135,13 +136,21 @@ export function MinusWordsPanel({ ctx }: { ctx: PluginContext }) {
 
   const handleAdd = () => {
     if (!newWord.trim()) return;
-    addMinusWord(newWord.trim(), isExact, targetGroupId, searchType, mwGroupId);
+    const added = addMinusWord(newWord.trim(), isExact, targetGroupId, searchType, mwGroupId);
+    if (!added) {
+      toast({ title: 'Такая минус-фраза уже есть в списке', duration: 2000 });
+      return;
+    }
+    if (mwGroupId) {
+      setExpandedGroups(prev => (prev.has(mwGroupId) ? prev : new Set(prev).add(mwGroupId)));
+    }
     setNewWord('');
   };
 
   const handleCreateGroup = () => {
     if (!newGroupName.trim()) return;
-    createMinusWordGroup(newGroupName.trim());
+    const id = createMinusWordGroup(newGroupName.trim());
+    setExpandedGroups(prev => new Set(prev).add(id));
     setNewGroupName('');
     setShowNewGroupInput(false);
   };
@@ -183,7 +192,10 @@ export function MinusWordsPanel({ ctx }: { ctx: PluginContext }) {
     const toRemove = previewData.phrases.filter(p => !pendingRemoveIds.has(p.id)).map(p => p.id);
     if (toRemove.length > 0) {
       ctx.store.dispatch('moveToTrash', toRemove);
-      setApplyResult({ removed: toRemove.length, groups: [] });
+      const affected = new Set(
+        previewData.phrases.filter(p => !pendingRemoveIds.has(p.id)).map(p => p.groupId),
+      );
+      setApplyResult({ removed: toRemove.length, groups: Array.from(affected) });
       ctx.eventBus.emit(AppEvents.PHRASES_CHANGED);
       ctx.eventBus.emit(AppEvents.MINUS_WORDS_CHANGED);
       setTimeout(() => setApplyResult(null), 5000);
@@ -214,11 +226,19 @@ export function MinusWordsPanel({ ctx }: { ctx: PluginContext }) {
 
   const handleImportConfirm = useCallback(() => {
     if (!importPreview || importPreview.words.length === 0) return;
-    for (const w of importPreview.words) addMinusWord(w, isExact, targetGroupId, searchType, mwGroupId);
+    let added = 0;
+    for (const w of importPreview.words) {
+      if (addMinusWord(w, isExact, targetGroupId, searchType, mwGroupId)) added++;
+    }
     setShowImportDialog(false);
     setImportText('');
     setImportPreview(null);
-    toast({ title: `Импортировано: ${importPreview.words.length} минус-фраз`, duration: 2000 });
+    toast({
+      title: added === importPreview.words.length
+        ? `Импортировано: ${added} минус-фраз`
+        : `Импортировано: ${added} из ${importPreview.words.length} (остальные уже были в списке)`,
+      duration: 2500,
+    });
     ctx.eventBus.emit(AppEvents.MINUS_WORDS_CHANGED);
   }, [importPreview, addMinusWord, isExact, targetGroupId, searchType, mwGroupId, ctx.eventBus]);
 
@@ -284,8 +304,8 @@ export function MinusWordsPanel({ ctx }: { ctx: PluginContext }) {
 
   const matchedPhrases = useMemo(() => {
     if (!showMatched) return [];
-    return matchPhrases(phrases, minusWords, scopeGroupIds);
-  }, [showMatched, phrases, minusWords, scopeGroupIds]);
+    return matchPhrases(phrases, minusWords, scopeGroupIds, groups);
+  }, [showMatched, phrases, minusWords, scopeGroupIds, groups]);
 
   const handleSuggest = useCallback(async () => {
     setSuggestions(prev => ({ ...prev, loading: true }));
@@ -339,15 +359,26 @@ export function MinusWordsPanel({ ctx }: { ctx: PluginContext }) {
             </SelectContent>
           </Select>
         </div>
-        <Select value={targetGroupId ?? 'global'} onValueChange={(v) => setTargetGroupId(v === 'global' ? null : v)}>
-          <SelectTrigger className="w-full h-6 rounded-[3px] border border-[var(--kc-border)] bg-[var(--kc-surface)] px-2 text-[11px]" aria-label="Группа применения">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="global">Глобально (все группы)</SelectItem>
-            {groups.filter(g => !g.isTrash).map(g => <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>)}
-          </SelectContent>
-        </Select>
+        <div className="flex gap-2">
+          <Select value={targetGroupId ?? 'global'} onValueChange={(v) => setTargetGroupId(v === 'global' ? null : v)}>
+            <SelectTrigger className="flex-1 h-6 rounded-[3px] border border-[var(--kc-border)] bg-[var(--kc-surface)] px-2 text-[11px]" aria-label="Группа применения">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="global">Глобально (все группы)</SelectItem>
+              {groups.filter(g => !g.isTrash).map(g => <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          <Select value={mwGroupId ?? 'nofolder'} onValueChange={(v) => setMwGroupId(v === 'nofolder' ? null : v)}>
+            <SelectTrigger className="flex-1 h-6 rounded-[3px] border border-[var(--kc-border)] bg-[var(--kc-surface)] px-2 text-[11px]" aria-label="Папка минус-фраз">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="nofolder">Без папки</SelectItem>
+              {minusWordGroups.map(g => <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
       <div className="h-px bg-[var(--kc-border-light)] mx-3" />
       <div className="flex items-center gap-1 px-3 pt-2">

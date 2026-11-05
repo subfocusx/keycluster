@@ -7,7 +7,7 @@
 // for the multi-project management system.
 // ============================================================
 
-import type { Group, Phrase, MinusWord, UIState } from './types';
+import type { Group, Phrase, MinusWord, MinusWordGroup, UIState } from './types';
 import type { ModuleSettingsMap } from './settings-store';
 
 // ---- Project File Format (.kcproj) ----
@@ -28,6 +28,8 @@ export interface ProjectState {
   groups: Group[];
   phrases: Phrase[];
   minusWords: MinusWord[];
+  /** Folders ("папки") for minus words — persisted, otherwise they are lost on reload */
+  minusWordGroups?: MinusWordGroup[];
   settings: ModuleSettingsMap;
   uiState: Partial<UIState>;
 }
@@ -54,6 +56,7 @@ export interface ProjectRecord {
   groups: Group[];
   phrases: Phrase[];
   minusWords: MinusWord[];
+  minusWordGroups?: MinusWordGroup[];
   settings: ModuleSettingsMap;
   uiState: Partial<UIState>;
   isBackup: boolean;
@@ -126,6 +129,7 @@ export interface ProjectTransport {
     phrases: string;
     phraseCount: number;
     minusWords: string;
+    minusWordGroups?: string;
     settings?: string;
     uiState?: string;
     isBackup?: boolean;
@@ -142,6 +146,7 @@ export interface ProjectTransport {
       phrases?: string;
       phraseCount?: number;
       minusWords?: string;
+      minusWordGroups?: string;
       settings?: string;
       uiState?: string;
     }

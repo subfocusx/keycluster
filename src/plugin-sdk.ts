@@ -40,8 +40,21 @@ export type { PlatformAPI } from './core/platform-api/types';
 export { useAppStore } from './core/store';
 export type { AppStore } from './core/store';
 
+// Minus words — shared matching rules (single source of truth for the
+// preview in the plugin panel and for preview/apply in the store).
+export {
+  matchPhrasesByMinusWords,
+  buildMinusMatcherModel,
+  normalizeMinusText,
+  minusWordKey,
+  dedupeMinusWords,
+} from './core/store/minusWordSlice';
+
 export { getEventBus } from './core/event-bus';
 export { AppEvents } from './core/types';
+
+// Russian pluralization helpers for UI text.
+export { plural, pluralize } from './core/i18n/plural';
 
 // ---- Module Runtime ----
 export { getRuntime } from './core/module-runtime';

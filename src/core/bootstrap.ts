@@ -89,7 +89,9 @@ export async function bootstrap(): Promise<void> {
   }));
 
   {
-    const unsub = await listen('store:phrases-updated', (event) => {
+    // Tauri backend event subscription — skipped in browser (no __TAURI_INTERNALS__)
+    try {
+      const unsub = await listen('store:phrases-updated', (event) => {
       const { action, payload } = event.payload as { action: string; payload: Record<string, unknown> };
       if (action === 'addPhrases') {
         const p = payload as { texts: string[]; groupId: string };
@@ -100,8 +102,11 @@ export async function bootstrap(): Promise<void> {
           useAppStore.getState().updatePhrase(u.id, { frequency: u.frequency });
         }
       }
-    });
-    _bootstrapUnsubs.push(unsub);
+      });
+      _bootstrapUnsubs.push(unsub);
+    } catch {
+      // Browser: no Tauri event backend — safe to skip
+    }
   }
 
   const allUserPluginIds = await orchestrateDiscovery();
@@ -233,11 +238,15 @@ export async function bootstrap(): Promise<void> {
   }
 
   if (import.meta.env.DEV) {
-    import('./hot-reload-watcher').then(({ startHotReloadWatcher }) => {
-      startHotReloadWatcher().catch((err: unknown) => {
-        console.error('[bootstrap] Failed to start hot-reload watcher:', err);
+    // The watcher needs the Tauri FS plugin — in a plain browser there is no runtime.
+    const isTauri = typeof (globalThis as { __TAURI_INTERNALS__?: unknown }).__TAURI_INTERNALS__ !== 'undefined';
+    if (isTauri) {
+      import('./hot-reload-watcher').then(({ startHotReloadWatcher }) => {
+        startHotReloadWatcher().catch((err: unknown) => {
+          console.error('[bootstrap] Failed to start hot-reload watcher:', err);
+        });
       });
-    });
+    }
   }
 }
 

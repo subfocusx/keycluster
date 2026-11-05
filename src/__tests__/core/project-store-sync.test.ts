@@ -301,3 +301,61 @@ describe('createSnapshot', () => {
     expect(snapshot.minusWords).toHaveLength(2);
   });
 });
+
+// ============================================================
+// Tests: UI-флаги панели групп сохраняются вместе с проектом
+// ============================================================
+
+describe('Project Store Sync — панель групп в проекте', () => {
+  beforeEach(() => {
+    useAppStore.getState().clearAll();
+  });
+
+  it('extract сохраняет положение панели групп', () => {
+    useAppStore.setState({
+      ui: {
+        ...useAppStore.getState().ui,
+        groupsPanelCollapsed: true,
+        groupsTreeOnLeft: true,
+        groupsPanelWidth: 333,
+      },
+    });
+    const appState = useAppStore.getState();
+    const settingsState = useSettingsStore.getState();
+    const state = extractProjectState({
+      groups: appState.groups,
+      phrases: appState.phrases,
+      minusWords: appState.minusWords,
+      settings: settingsState.settings,
+      ui: appState.ui,
+    });
+
+    expect(state.uiState?.groupsPanelCollapsed).toBe(true);
+    expect(state.uiState?.groupsTreeOnLeft).toBe(true);
+    expect(state.uiState?.groupsPanelWidth).toBe(333);
+  });
+
+  it('восстановление проекта возвращает положение панели групп', async () => {
+    const { restoreIntoStore } = await import('@/core/project-service-state');
+    useAppStore.getState().setGroupsTreeOnLeft(false);
+    useAppStore.getState().setGroupsPanelCollapsed(false);
+
+    restoreIntoStore({
+      groups: [],
+      phrases: [],
+      minusWords: [],
+      minusWordGroups: [],
+      settings: {},
+      uiState: {
+        groupsPanelCollapsed: true,
+        groupsTreeOnLeft: true,
+        groupsPanelWidth: 321,
+      } as any,
+    });
+
+    const ui = useAppStore.getState().ui;
+    expect(ui.groupsPanelCollapsed).toBe(true);
+    expect(ui.groupsTreeOnLeft).toBe(true);
+    expect(ui.groupsPanelWidth).toBe(321);
+  });
+});

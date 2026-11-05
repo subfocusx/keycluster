@@ -15,6 +15,11 @@ import { LABEL_COLOR_MAP, LABEL_COLORS, LABEL_NAMES } from './shared';
 import { type ColDef } from './shared';
 
 export interface PhrasesToolbarProps {
+  /** Путь активной группы от корня (для хлебных крошек) */
+  groupPath: { id: string; name: string }[];
+  onSelectGroup: (id: string) => void;
+  /** Число фраз в области без учёта фильтров */
+  totalCount: number;
   searchQuery: string;
   setSearchQuery: (v: string) => void;
   labelFilter: string | null;
@@ -37,8 +42,68 @@ export interface PhrasesToolbarProps {
 }
 
 export const PhrasesToolbar = React.memo(function PhrasesToolbar(props: PhrasesToolbarProps) {
+  const chips: { key: string; label: string; onClear: () => void }[] = [];
+  if (props.searchQuery) {
+    chips.push({ key: 'search', label: `Поиск: «${props.searchQuery}»`, onClear: () => props.setSearchQuery('') });
+  }
+  if (props.labelFilter) {
+    chips.push({ key: 'label', label: `Метка: ${LABEL_NAMES[props.labelFilter] ?? props.labelFilter}`, onClear: () => props.setLabelFilter(null) });
+  }
+  if (props.tagFilter) {
+    chips.push({ key: 'tag', label: `Тег: ${props.tagFilter}`, onClear: () => props.setTagFilter(null) });
+  }
+  if (props.showStarredOnly) {
+    chips.push({ key: 'star', label: 'Только избранное', onClear: () => props.onToggleStarred() });
+  }
+
   return (
-    <div className="flex items-center gap-2 px-3 h-[30px] border-b border-[var(--kc-border)] bg-[var(--kc-toolbar-bg)] shrink-0">
+    <div className="shrink-0 border-b border-[var(--kc-border)] bg-[var(--kc-toolbar-bg)]">
+      {(props.groupPath.length > 0 || chips.length > 0) && (
+        <div className="flex items-center gap-2 px-3 h-[24px] border-b border-[var(--kc-border-light)] overflow-x-auto">
+          {props.groupPath.length > 0 && (
+            <nav aria-label="Путь активной группы" className="flex items-center gap-0.5 shrink-0">
+              {props.groupPath.map((g, i) => (
+                <React.Fragment key={g.id}>
+                  {i > 0 && <MIcon name="chevron_right" className="!text-[12px] text-[var(--kc-text-disabled)]" />}
+                  <button
+                    className={`text-[11px] px-1 py-0.5 rounded hover:bg-[var(--kc-surface-hover)] truncate max-w-[160px] ${
+                      i === props.groupPath.length - 1
+                        ? 'text-[var(--kc-text)] font-medium'
+                        : 'text-[var(--kc-text-secondary)]'
+                    }`}
+                    onClick={() => props.onSelectGroup(g.id)}
+                    title={g.name}
+                  >
+                    {g.name}
+                  </button>
+                </React.Fragment>
+              ))}
+            </nav>
+          )}
+          {chips.length > 0 && (
+            <div className="flex items-center gap-1 ml-1 shrink-0">
+              {chips.map(c => (
+                <span
+                  key={c.key}
+                  className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full"
+                  style={{ background: 'rgba(14,156,232,0.1)', border: '1px solid rgba(14,156,232,0.25)', color: 'var(--kc-blue)' }}
+                >
+                  <span className="truncate max-w-[180px]">{c.label}</span>
+                  <button
+                    className="opacity-70 hover:opacity-100"
+                    onClick={c.onClear}
+                    title={`Сбросить: ${c.label}`}
+                    aria-label={`Сбросить фильтр ${c.label}`}
+                  >
+                    <MIcon name="close" className="!text-[10px]" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+      <div className="flex items-center gap-2 px-3 h-[30px]">
       <Popover open={props.colManagerOpen} onOpenChange={props.setColManagerOpen}>
         <PopoverTrigger asChild>
           <button className="tool-btn !w-7 !h-7" title="Настройки столбцов">
@@ -151,8 +216,12 @@ export const PhrasesToolbar = React.memo(function PhrasesToolbar(props: PhrasesT
       )}
       <span className="font-mono-data text-[var(--kc-text-secondary)] ml-auto">
         {props.sortedPhrasesLength}
+        {props.totalCount !== props.sortedPhrasesLength && (
+          <span className="opacity-70"> из {props.totalCount}</span>
+        )}
         {props.activeFilterCount > 0 && <span style={{ color: 'var(--kc-blue)' }}> · {props.activeFilterCount} фильтр.</span>}
       </span>
+      </div>
     </div>
   );
 });

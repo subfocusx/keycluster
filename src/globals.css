@@ -693,7 +693,14 @@ tr:hover .row-action {
   color: var(--text-secondary);
   background: transparent;
   border: 1px dashed color-mix(in srgb, var(--text-secondary) 35%, transparent);
-  opacity: 0.6;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+/* Бейдж с нулём минус-фраз не засоряет дерево — появляется при наведении */
+.tree-item:hover .tree-minus.tree-minus-empty,
+.tree-item.active .tree-minus.tree-minus-empty,
+.tree-item:focus-within .tree-minus.tree-minus-empty {
+  opacity: 0.65;
 }
 .tree-item .tree-minus.tree-minus-empty:hover {
   background: color-mix(in srgb, var(--accent-red) 12%, transparent);
@@ -819,4 +826,15 @@ tr:hover .row-action {
   font-size: 11px;
   border: 1px solid var(--border);
   border-radius: 3px;
+}
+
+/* Ручка изменения ширины боковой панели — видна, чтобы её можно было найти */
+.panel-resize-handle {
+  background: var(--border);
+  opacity: 0.55;
+  transition: opacity 120ms ease, background 120ms ease;
+}
+.panel-resize-handle:hover {
+  background: var(--accent-blue);
+  opacity: 1;
 }

@@ -15,12 +15,33 @@ import {
 } from '@/components/ui/context-menu';
 import { ColorPickerSubmenu } from './color-picker-submenu';
 import { MIcon } from '@/shell/shared-icon';
+import {
+  buildExportFileName,
+  buildGroupCsv,
+  buildGroupTxt,
+  collectGroupPhrases,
+} from '@/core/export/groupExport';
 
 
 type KCDialogHandle = {
   prompt: (message: string, options?: any) => Promise<string | null>;
   confirm: (message: string, options?: any) => Promise<boolean>;
 };
+
+/** Скачивание текстового файла (CSV/TXT) */
+function downloadTextFile(fileName: string, content: string, mimeType: string): void {
+  try {
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 0);
+  } catch { /* окружение не поддерживает скачивание */ }
+}
 
 export function GroupItemContextMenu({ group, groups, phrases, ctx, kcDialog, setGroupColor, deleteGroup, pluginContribs = [] }: {
   group: Group;
@@ -62,22 +83,34 @@ export function GroupItemContextMenu({ group, groups, phrases, ctx, kcDialog, se
         ctx.eventBus.emit(AppEvents.GROUPS_CHANGED);
       }} />
 
-      {/* Export phrases */}
+      {/* Export phrases (CSV / TXT) + copy to clipboard */}
+      <ContextMenuItem onClick={() => {
+        const scoped = collectGroupPhrases(group.id, groups, phrases);
+        const csv = buildGroupCsv(scoped, groups);
+        downloadTextFile(buildExportFileName(group.name, 'csv'), '\uFEFF' + csv, 'text/csv;charset=utf-8');
+        toast({ title: `Экспортировано в CSV: ${scoped.length} фраз из "${group.name}"`, duration: 2000 });
+      }}>
+        <MIcon name="download" className="!text-[14px] mr-2" /> Экспорт фраз (CSV)
+      </ContextMenuItem>
+
+      <ContextMenuItem onClick={() => {
+        const scoped = collectGroupPhrases(group.id, groups, phrases);
+        const txt = buildGroupTxt(scoped);
+        downloadTextFile(buildExportFileName(group.name, 'txt'), txt, 'text/plain;charset=utf-8');
+        toast({ title: `Экспортировано в TXT: ${scoped.length} фраз из "${group.name}"`, duration: 2000 });
+      }}>
+        <MIcon name="download" className="!text-[14px] mr-2" /> Экспорт фраз (TXT)
+      </ContextMenuItem>
+
       <ContextMenuItem onClick={async () => {
-        const collectIds = (gid: KCID): KCID[] => {
-          const ids: KCID[] = [gid];
-          groups.filter(g => g.parentId === gid).forEach(child => ids.push(...collectIds(child.id)));
-          return ids;
-        };
-        const groupIds = new Set(collectIds(group.id));
-        const groupPhrases = phrases.filter(p => groupIds.has(p.groupId));
-        const text = groupPhrases.map(p => p.text).join('\n');
+        const scoped = collectGroupPhrases(group.id, groups, phrases);
+        const text = buildGroupTxt(scoped);
         try {
           await navigator.clipboard.writeText(text);
-          toast({ title: `Скопировано: ${groupPhrases.length} фраз из "${group.name}"`, duration: 2000 });
-        } catch { /* fallback */ }
+          toast({ title: `Скопировано: ${scoped.length} фраз из "${group.name}"`, duration: 2000 });
+        } catch { /* clipboard недоступен */ }
       }}>
-        <MIcon name="content_copy" className="!text-[14px] mr-2" /> Экспортировать фразы
+        <MIcon name="content_copy" className="!text-[14px] mr-2" /> Копировать фразы в буфер
       </ContextMenuItem>
 
       <ContextMenuSeparator />

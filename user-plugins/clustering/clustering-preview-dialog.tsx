@@ -19,9 +19,9 @@ export function PreviewDialog({
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] max-h-[80vh] flex flex-col overflow-hidden !p-0 !gap-0">
-        <DialogHeader className="px-4 pt-4 pb-2 shrink-0 border-b border-[var(--kc-border-light)] min-w-0">
-          <DialogTitle className="flex items-center gap-2 text-[14px]">
+      <DialogContent className="w-[500px] max-w-[calc(100vw-2rem)] max-h-[80vh] flex flex-col overflow-hidden !p-0 !gap-0">
+        <DialogHeader className="px-4 pr-10 pt-4 pb-2 shrink-0 border-b border-[var(--kc-border-light)] min-w-0">
+          <DialogTitle className="flex items-center gap-2 text-[14px] min-w-0 truncate">
             <MIcon name="visibility" className="!text-[18px] text-[var(--accent-blue)] shrink-0" />
             Предпросмотр кластеризации
           </DialogTitle>

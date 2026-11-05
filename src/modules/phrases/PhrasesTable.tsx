@@ -49,6 +49,22 @@ export function PhrasesTable({ ctx }: { ctx: PluginContext }) {
 
   const S = usePhraseTableState();
   const nonTrashGroups = groups.filter(g => !g.isTrash);
+  const setActiveGroup = useAppStore(s => s.setActiveGroup);
+
+  /** Путь активной группы от корня — для хлебных крошек */
+  const groupPath = useMemo(() => {
+    if (!activeGroupId) return [] as { id: string; name: string }[];
+    const byId = new Map(groups.map(g => [g.id, g]));
+    const path: { id: string; name: string }[] = [];
+    let cur = byId.get(activeGroupId);
+    const guard = new Set<string>();
+    while (cur && !guard.has(cur.id)) {
+      guard.add(cur.id);
+      path.unshift({ id: cur.id, name: cur.name });
+      cur = cur.parentId ? byId.get(cur.parentId) : undefined;
+    }
+    return path;
+  }, [groups, activeGroupId]);
 
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
@@ -159,6 +175,12 @@ export function PhrasesTable({ ctx }: { ctx: PluginContext }) {
 
   const allSelected = data.sortedPhrases.length > 0 && selectedPhraseIds.size > 0 && data.sortedPhrases.every(p => selectedPhraseIds.has(p.id));
 
+  const hasActiveFilters = !!S.searchQuery
+    || !!S.tagFilter
+    || !!S.labelFilter
+    || S.showStarredOnly
+    || Object.values(S.columnFilters).some(f => !!f && f.value !== '');
+
   const handleConfirmMove = useCallback(() => {
     if (S.targetGroupId) {
       if (S.moveAction === 'move') {
@@ -175,6 +197,9 @@ export function PhrasesTable({ ctx }: { ctx: PluginContext }) {
   return (
     <div className="flex flex-col h-full">
       <PhrasesToolbar
+        groupPath={groupPath}
+        onSelectGroup={(id) => setActiveGroup(id)}
+        totalCount={data.scopeTotal}
         searchQuery={S.searchQuery}
         setSearchQuery={S.setSearchQuery}
         labelFilter={S.labelFilter}
@@ -264,7 +289,19 @@ export function PhrasesTable({ ctx }: { ctx: PluginContext }) {
           />
           <tbody style={{ position: 'relative' }}>
             {data.sortedPhrases.length === 0 ? (
-              <EmptyPhrasesState activeGroupId={activeGroupId} ctx={ctx} numVisibleCols={visibleCols.length} />
+              <EmptyPhrasesState
+                activeGroupId={activeGroupId}
+                ctx={ctx}
+                numVisibleCols={visibleCols.length}
+                hasActiveFilters={hasActiveFilters}
+                onResetFilters={() => {
+                  S.setSearchQuery('');
+                  S.setTagFilter(null);
+                  S.setLabelFilter(null);
+                  S.setShowStarredOnly(false);
+                  S.setColumnFilters({});
+                }}
+              />
             ) : (
               <VirtualizedRows
                 sortedPhrases={data.sortedPhrases}

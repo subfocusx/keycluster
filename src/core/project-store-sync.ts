@@ -16,8 +16,9 @@
 // ============================================================
 
 import type { ProjectState } from './project-types';
-import type { Group, Phrase, MinusWord, AppState } from './types';
+import type { Group, Phrase, MinusWord, MinusWordGroup, AppState } from './types';
 import { rebuildPhraseMap } from './store/phraseSlice';
+import { dedupeMinusWords } from './store/minusWordSlice';
 
 // ---- Extract ----
 
@@ -26,22 +27,31 @@ export function extractProjectState(state: {
   groups: Group[];
   phrases: Phrase[];
   minusWords: MinusWord[];
+  minusWordGroups?: MinusWordGroup[];
   settings: Record<string, Record<string, unknown>>;
   ui: {
     theme: string;
     rightPanel: { width: number; open: boolean };
     leftPanel: { width: number; open: boolean; module: string | null };
+    groupsPanelCollapsed?: boolean;
+    groupsTreeOnLeft?: boolean;
+    groupsPanelWidth?: number;
   };
 }): ProjectState {
   return {
     groups: serializeGroups(state.groups),
     phrases: serializePhrases(state.phrases),
     minusWords: serializeMinusWords(state.minusWords),
+    minusWordGroups: serializeMinusWordGroups(state.minusWordGroups ?? []),
     settings: { ...state.settings },
     uiState: {
       theme: state.ui.theme as any,
       rightPanel: { ...state.ui.rightPanel },
       leftPanel: { ...state.ui.leftPanel },
+      // Положение и состояние панели групп — часть проекта
+      groupsPanelCollapsed: state.ui.groupsPanelCollapsed,
+      groupsTreeOnLeft: state.ui.groupsTreeOnLeft,
+      groupsPanelWidth: state.ui.groupsPanelWidth,
     },
   };
 }
@@ -53,7 +63,8 @@ export function restoreToPartialState(state: ProjectState): Partial<AppState> {
   return {
     groups: state.groups,
     phrases: state.phrases,
-    minusWords: state.minusWords,
+    minusWords: dedupeMinusWords(state.minusWords),
+    minusWordGroups: state.minusWordGroups ?? [],
     selectedGroupIds: new Set(),
     selectedPhraseIds: new Set(),
     activeGroupId: null,
@@ -106,6 +117,17 @@ function serializeMinusWords(minusWords: MinusWord[]): MinusWord[] {
     groupId: mw.groupId,
     searchType: mw.searchType,
     createdAt: mw.createdAt,
+    // mwGroupId links the word with its folder ("папка") — must survive save/load
+    mwGroupId: mw.mwGroupId ?? null,
+  }));
+}
+
+/** Clean minus-word folders for serialization */
+function serializeMinusWordGroups(groups: MinusWordGroup[]): MinusWordGroup[] {
+  return groups.map(g => ({
+    id: g.id,
+    name: g.name,
+    createdAt: g.createdAt,
   }));
 }
 

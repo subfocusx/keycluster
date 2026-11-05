@@ -4,7 +4,9 @@
 
 import type { PluginContext } from 'plugin-sdk';
 import React, { useState, useCallback, useMemo } from 'react';
-import { useAppStore, Button, Badge, Checkbox, Label, Slider, ScrollArea, useKCDialog } from 'plugin-sdk';
+import { useAppStore, Button, Badge, Checkbox, Label, Slider, ScrollArea, plural } from 'plugin-sdk';
+import { ApplyPreview } from '@/components/ApplyPreview';
+import type { ApplyPreviewItem } from '@/components/ApplyPreview';
 import type { ImplicitDuplicateGroup, FindDuplicatesOptions } from './utils';
 import { ImplicitDuplicatesWorkerBridge } from './worker-bridge';
 
@@ -28,6 +30,19 @@ export function terminateWorkerBridge() {
 
 function MIcon({ name, className = '' }: { name: string; className?: string }) {
   return <span className={`material-symbols-outlined ${className}`}>{name}</span>;
+}
+
+// ---- Предпросмотр перед применением ----
+
+/** Состояние предпросмотра: что и сколько будет перемещено в корзину. */
+interface PreviewState {
+  title: string;
+  summary: string;
+  items: ApplyPreviewItem[];
+  /** id фраз, которые будут перемещены в корзину. */
+  ids: string[];
+  /** Дополнительное действие после применения (например, повторный поиск). */
+  afterApply?: () => void;
 }
 
 // ---- Группа дублей ----
@@ -147,7 +162,6 @@ function DuplicateGroupCard({
 export function ImplicitDuplicatesPanel(_props?: { ctx?: PluginContext }) {
   const phrases = useAppStore(s => s.phrases);
   const moveToTrash = useAppStore(s => s.moveToTrash);
-  const kcDialog = useKCDialog();
   const ctx = _props?.ctx;
 
   // Local UI state — read initial values from ctx or defaults
@@ -160,6 +174,7 @@ export function ImplicitDuplicatesPanel(_props?: { ctx?: PluginContext }) {
   const [isSearching, setIsSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [searchTime, setSearchTime] = useState(0);
+  const [preview, setPreview] = useState<PreviewState | null>(null);
 
   // Активная группа (только не удалённые)
   const activePhrases = useMemo(() => {
@@ -248,36 +263,85 @@ export function ImplicitDuplicatesPanel(_props?: { ctx?: PluginContext }) {
     setSelectedIds(new Set());
   }, []);
 
-  // Удалить выбранные
-  const handleDeleteSelected = async () => {
+  // Удалить выбранные — сначала предпросмотр, удаление только после «Применить»
+  const handleDeleteSelected = () => {
     if (selectedIds.size === 0) return;
-    const confirmed = await kcDialog.confirm(
-      `Переместить ${selectedIds.size} фраз в корзину?`,
-      { title: 'Удаление неявных дублей', confirmLabel: 'Удалить', variant: 'destructive' },
-    );
-    if (!confirmed) return;
 
-    const idsToDelete = Array.from(selectedIds);
-    moveToTrash(idsToDelete);
-    setSelectedIds(new Set());
-    // handleSearch читает свежие данные из store, поэтому повторный
-    // поиск корректно увидит, что удалённые фразы уже в корзине.
-    handleSearch();
+    const ids = Array.from(selectedIds);
+    const texts = new Map<string, string>();
+    const mainByDuplicate = new Map<string, string>();
+    groups.forEach(g => {
+      g.phrases.forEach(p => {
+        texts.set(p.id, p.text);
+        if (p.id !== g.mainPhrase.id) mainByDuplicate.set(p.id, g.mainPhrase.text);
+      });
+    });
+
+    setPreview({
+      title: 'Предпросмотр удаления неявных дублей',
+      summary: `Будет перемещено в корзину ${selectedIds.size} фраз. Проверьте список перед применением.`,
+      items: ids.map(id => ({
+        id,
+        text: texts.get(id) ?? id,
+        type: 'remove' as const,
+        note: mainByDuplicate.has(id) ? `дубль «${mainByDuplicate.get(id)}»` : 'дубль',
+      })),
+      ids,
+      afterApply: () => {
+        // handleSearch читает свежие данные из store, поэтому повторный
+        // поиск корректно увидит, что удалённые фразы уже в корзине.
+        handleSearch();
+      },
+    });
   };
 
-  // Удалить все дубли в группе (оставить только главную)
-  const handleKeepOnlyMain = async (mainId: string, duplicateIds: string[]) => {
-    const confirmed = await kcDialog.confirm(
-      `Удалить ${duplicateIds.length} дублей, оставив главную фразу?`,
-      { title: 'Удаление дублей', confirmLabel: 'Удалить', variant: 'destructive' },
-    );
-    if (!confirmed) return;
+  // Удалить все дубли в группе (оставить только главную) — тоже через предпросмотр
+  const handleKeepOnlyMain = (mainId: string, duplicateIds: string[]) => {
+    const group = groups.find(g => g.mainPhrase.id === mainId);
+    const texts = new Map<string, string>();
+    group?.phrases.forEach(p => texts.set(p.id, p.text));
 
-    moveToTrash(duplicateIds);
-    // Очищаем результаты и запускаем повторный поиск с актуальными данными
-    setGroups([]);
+    setPreview({
+      title: 'Предпросмотр удаления дублей группы',
+      summary: `Будет перемещено в корзину ${duplicateIds.length} ${plural(duplicateIds.length, 'дубль', 'дубля', 'дублей')}, останется главная фраза «${group?.mainPhrase.text ?? ''}».`,
+      items: duplicateIds.map(id => ({
+        id,
+        text: texts.get(id) ?? id,
+        type: 'remove' as const,
+        note: 'дубль',
+      })),
+      ids: duplicateIds,
+      afterApply: () => {
+        // Очищаем результаты и запускаем повторный поиск с актуальными данными
+        setGroups([]);
+        handleSearch();
+      },
+    });
+  };
+
+  // Сколько групп затронуто предпросмотром
+  const affectedGroupCount = useMemo(() => {
+    if (!preview) return 0;
+    const ids = new Set(preview.ids);
+    const touched = new Set<string>();
+    groups.forEach(g => {
+      if (g.phrases.some(p => ids.has(p.id))) touched.add(g.groupId);
+    });
+    return touched.size;
+  }, [groups, preview]);
+
+  // Применение предпросмотра — перемещение в корзину
+  const handleApplyPreview = () => {
+    if (!preview || preview.ids.length === 0) return;
+    moveToTrash(preview.ids);
+    setPreview(null);
     setSelectedIds(new Set());
-    handleSearch();
+    preview.afterApply?.();
+  };
+
+  // Отмена предпросмотра — ничего не меняем
+  const handleCancelPreview = () => {
+    setPreview(null);
   };
 
   // Статистика
@@ -327,6 +391,22 @@ export function ImplicitDuplicatesPanel(_props?: { ctx?: PluginContext }) {
               </label>
             </div>
           </div>
+
+          {/* Предпросмотр перед применением */}
+          {preview && (
+            <ApplyPreview
+              title={preview.title}
+              summary={preview.summary}
+              counters={[
+                { label: 'Будет удалено', value: `${preview.ids.length} ${plural(preview.ids.length, 'дубль', 'дубля', 'дублей')}` },
+                { label: 'Затронуто групп', value: `${affectedGroupCount} ${plural(affectedGroupCount, 'группа', 'группы', 'групп')}` },
+              ]}
+              items={preview.items}
+              totalCount={preview.ids.length}
+              onApply={handleApplyPreview}
+              onCancel={handleCancelPreview}
+            />
+          )}
 
           {/* Результаты */}
           {hasSearched && !isSearching && (

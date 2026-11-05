@@ -1,48 +1,10 @@
 import type { AppModule, PluginContext } from 'plugin-sdk';
 import { useAppStore } from 'plugin-sdk';
-import type { Phrase } from 'plugin-sdk';
 import { DeduplicatorPanel } from './components';
+import { deduplicate } from './deduplicate';
 
-export interface DeduplicateOptions {
-  caseSensitive: boolean;
-  withinGroup: boolean;
-}
-
-export function deduplicate(
-  phrases: Phrase[],
-  options: DeduplicateOptions,
-): string[] {
-  const { caseSensitive, withinGroup } = options;
-  const seen = new Map<string, string>();
-  const duplicateIds: string[] = [];
-
-  if (withinGroup) {
-    const groupSeen = new Map<string, Map<string, string>>();
-    for (const phrase of phrases) {
-      const key = caseSensitive ? phrase.text : phrase.text.toLowerCase();
-      if (!groupSeen.has(phrase.groupId)) {
-        groupSeen.set(phrase.groupId, new Map());
-      }
-      const groupMap = groupSeen.get(phrase.groupId)!;
-      if (groupMap.has(key)) {
-        duplicateIds.push(phrase.id);
-      } else {
-        groupMap.set(key, phrase.id);
-      }
-    }
-  } else {
-    for (const phrase of phrases) {
-      const key = caseSensitive ? phrase.text : phrase.text.toLowerCase();
-      if (seen.has(key)) {
-        duplicateIds.push(phrase.id);
-      } else {
-        seen.set(key, phrase.id);
-      }
-    }
-  }
-
-  return duplicateIds;
-}
+export { deduplicate, collectDuplicateMatches } from './deduplicate';
+export type { DeduplicateOptions, DuplicateMatch } from './deduplicate';
 
 const deduplicatorModule: AppModule = {
   manifest: {

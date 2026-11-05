@@ -71,6 +71,16 @@ export function restoreIntoStore(state: ProjectState): void {
     if (state.uiState.leftPanel) {
       useAppStore.getState().setLeftPanelWidth(state.uiState.leftPanel.width);
     }
+    // Положение и состояние панели групп
+    if (typeof state.uiState.groupsPanelCollapsed === 'boolean') {
+      useAppStore.getState().setGroupsPanelCollapsed(state.uiState.groupsPanelCollapsed);
+    }
+    if (typeof state.uiState.groupsTreeOnLeft === 'boolean') {
+      useAppStore.getState().setGroupsTreeOnLeft(state.uiState.groupsTreeOnLeft);
+    }
+    if (typeof state.uiState.groupsPanelWidth === 'number') {
+      useAppStore.getState().setGroupsPanelWidth(state.uiState.groupsPanelWidth);
+    }
   }
 }
 
@@ -81,6 +91,7 @@ export function getCurrentProjectState(): ProjectState {
     groups: appState.groups,
     phrases: appState.phrases,
     minusWords: appState.minusWords,
+    minusWordGroups: appState.minusWordGroups,
     settings: settingsState.settings,
     ui: appState.ui,
   });

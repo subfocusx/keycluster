@@ -5,10 +5,25 @@ import type { Group, KCID, PluginContext, ModuleUIContribution } from '@/plugin-
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useSyncExternalStore } from 'react';
 import { useAppStore } from '@/plugin-sdk';
 import { AppEvents } from '@/plugin-sdk';
 import type { GroupSortField } from './utils/sort';
+import {
+  applyGroupDrop,
+  canAcceptGroupDrop,
+  createDragImage,
+  endDrag,
+  getDragPayload,
+  getDropTargetId,
+  isDragCancelled,
+  setDragImageSafe,
+  setDropTargetId,
+  subscribeDrag,
+  writePayload,
+  beginDrag,
+} from '@/core/dnd/groupDnd';
+import type { DragPayload } from '@/core/dnd/groupDnd';
 import {
   ContextMenu,
   ContextMenuTrigger,
@@ -76,6 +91,8 @@ function GroupItem({ group, depth, ctx, isActive, phraseCount, minusCount, isSel
   const deleteGroup = useAppStore(s => s.deleteGroup);
   const setGroupColor = useAppStore(s => s.setGroupColor);
   const setGroupsColor = useAppStore(s => s.setGroupsColor);
+  const movePhrases = useAppStore(s => s.movePhrases);
+  const moveGroup = useAppStore(s => s.moveGroup);
   const setMultigroupMode = useAppStore(s => s.setMultigroupMode);
   const groups = useAppStore(s => s.groups);
   const phrases = useAppStore(s => s.phrases);
@@ -119,6 +136,82 @@ function GroupItem({ group, depth, ctx, isActive, phraseCount, minusCount, isSel
     ? { backgroundColor: 'rgba(251, 197, 48, 0.45)' }
     : undefined;
 
+  // ---- Drag & drop: группа — источник переноса и цель для drop ----
+
+  const dragPayload = useSyncExternalStore(subscribeDrag, getDragPayload, getDragPayload);
+  const dropTargetId = useSyncExternalStore(subscribeDrag, getDropTargetId, getDropTargetId);
+  /** mousedown на кнопке внутри строки — перенос не должен начинаться. */
+  const dragBlockedRef = useRef(false);
+
+  const canAccept = useCallback((payload: DragPayload | null) => {
+    if (!payload) return false;
+    return canAcceptGroupDrop(groups, payload, group.id);
+  }, [groups, group.id]);
+
+  const handleDragStart = (e: React.DragEvent) => {
+    if (dragBlockedRef.current) {
+      e.preventDefault();
+      return;
+    }
+    const payload: DragPayload = { kind: 'group', groupId: group.id, label: group.name };
+    writePayload(e.dataTransfer, payload);
+    beginDrag(payload);
+    setDragImageSafe(e.dataTransfer, createDragImage(group.name, 'group'));
+  };
+
+  const handleDragEnd = () => {
+    endDrag();
+    setDropTargetId(null);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    if (isDragCancelled()) return;
+    if (!canAccept(getDragPayload())) return;
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+    setDropTargetId(group.id);
+  };
+
+  const handleDragEnter = (e: React.DragEvent) => {
+    if (isDragCancelled()) return;
+    if (!canAccept(getDragPayload())) return;
+    e.preventDefault();
+    e.stopPropagation();
+    setDropTargetId(group.id);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    const related = e.relatedTarget as Node | null;
+    if (related && e.currentTarget.contains(related)) return;
+    if (getDropTargetId() === group.id) setDropTargetId(null);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDropTargetId(null);
+    if (isDragCancelled()) return;
+    const payload = getDragPayload();
+    const applied = applyGroupDrop(payload, group.id, groups, { movePhrases, moveGroup });
+    if (!applied) return;
+    if (payload && payload.kind === 'phrase') {
+      ctx.eventBus.emit(AppEvents.PHRASES_CHANGED);
+    } else {
+      ctx.eventBus.emit(AppEvents.GROUPS_CHANGED);
+    }
+  };
+
+  const isDropTarget = !!dragPayload && dropTargetId === group.id;
+
+  const dropTargetStyle: React.CSSProperties | undefined = isDropTarget
+    ? {
+        backgroundColor: 'var(--kc-blue-light)',
+        boxShadow: 'inset 0 0 0 1px var(--kc-blue)',
+        borderLeftColor: 'var(--kc-blue)',
+      }
+    : undefined;
+
   return (
     <ContextMenu onOpenChange={(open) => {
       if (open) {
@@ -136,11 +229,23 @@ function GroupItem({ group, depth, ctx, isActive, phraseCount, minusCount, isSel
         <div
           className={`tree-item ${isActive ? 'active' : ''} ${isSelected ? 'selected' : ''} ${isHighlighted ? 'tree-item-highlighted' : ''}`}
           data-depth={depth}
+          data-group-id={group.id}
           style={{
             paddingLeft: `${depth * 14 + 6}px`,
             position: 'relative',
             ...highlightStyle,
+            ...dropTargetStyle,
           }}
+          draggable
+          onMouseDown={(e) => {
+            dragBlockedRef.current = !!(e.target as HTMLElement).closest('button');
+          }}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+          onDragEnter={handleDragEnter}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
           onClick={handleClick}
         >
           {/* Indent lines for subgroups (VS Code style) */}
@@ -297,7 +402,9 @@ function GroupItem({ group, depth, ctx, isActive, phraseCount, minusCount, isSel
           {!group.isTrash && (
             <button
               className={`tree-minus${minusCount === 0 ? ' tree-minus-empty' : ''}`}
-              title={`Минус-фразы группы: ${minusCount}`}
+              title={minusCount > 0
+                ? `Минус-фразы группы: ${minusCount}`
+                : 'Минус-фразы группы: нет — нажмите, чтобы добавить'}
               onClick={(e) => {
                 e.stopPropagation();
                 useAppStore.getState().setActiveGroup(group.id);

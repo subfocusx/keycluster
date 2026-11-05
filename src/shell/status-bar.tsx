@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useAppStore, getRuntime , AppEvents} from '@/plugin-sdk';
 import { getEventBus } from '@/plugin-sdk';
 import type { ModuleUIContribution } from '@/plugin-sdk';
@@ -8,6 +8,22 @@ import { SaveStatusIndicator } from '@/components/SaveStatusIndicator';
 import { ProjectStatisticsDialog } from '@/components/ProjectStatisticsDialog';
 import { ModuleErrorBoundary } from '@/components/ModuleErrorBoundary';
 import { MIcon } from '@/shell/shared-icon';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import type { UndoSnapshot } from '@/core/store/undoSlice';
+
+/** Сколько последних действий показывать в подсказке статус-бара. */
+export const HISTORY_TOOLTIP_LINES = 5;
+
+/**
+ * Превратить стек истории в строки подсказки вида «2. Перенос 6 фраз в «Кластеры»».
+ * Первой идёт последнее действие — именно его отменит следующий клик.
+ */
+export function buildHistoryLines(stack: UndoSnapshot[]): string[] {
+  return stack
+    .slice(-HISTORY_TOOLTIP_LINES)
+    .reverse()
+    .map((snapshot, i) => `${i + 1}. ${snapshot.label ?? 'Действие'}`);
+}
 
 export function StatusBar({ onTrashOpen }: { onTrashOpen: () => void }) {
   const [statsOpen, setStatsOpen] = useState(false);
@@ -31,8 +47,13 @@ export function StatusBar({ onTrashOpen }: { onTrashOpen: () => void }) {
   const selectedPhraseIds = useAppStore(s => s.selectedPhraseIds);
   const clusteringResults = useAppStore(s => s.clusteringResults);
   const applyClusteringResults = useAppStore(s => s.applyClusteringResults);
-  const undoCount = useAppStore(s => s.undoStack.length);
-  const redoCount = useAppStore(s => s.redoStack.length);
+  const undoStack = useAppStore(s => s.undoStack);
+  const redoStack = useAppStore(s => s.redoStack);
+  const undoCount = undoStack.length;
+  const redoCount = redoStack.length;
+
+  const undoHistory = useMemo(() => buildHistoryLines(undoStack), [undoStack]);
+  const redoHistory = useMemo(() => buildHistoryLines(redoStack), [redoStack]);
 
   const activeGroup = groups.find(g => g.id === activeGroupId);
   const phraseCount = activeGroupId
@@ -118,25 +139,41 @@ export function StatusBar({ onTrashOpen }: { onTrashOpen: () => void }) {
         <SaveStatusIndicator />
         {(undoCount > 0 || redoCount > 0) && (
           <span className="text-[11px] tabular-nums flex items-center gap-1">
-            <button
-              className="flex items-center gap-0.5 hover:opacity-100 opacity-90 cursor-pointer disabled:opacity-40 disabled:cursor-default"
-              disabled={undoCount === 0}
-              onClick={() => useAppStore.getState().undo()}
-              title={`Отменить (${undoCount})`}
-              aria-label={`Отменить (${undoCount})`}
-            >
-              ↩ {undoCount}
-            </button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  className="flex items-center gap-0.5 hover:opacity-100 opacity-90 cursor-pointer disabled:opacity-40 disabled:cursor-default"
+                  disabled={undoCount === 0}
+                  onClick={() => useAppStore.getState().undo()}
+                  aria-label={`Отменить (${undoCount})`}
+                >
+                  ↩ {undoCount}
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="text-[11px] text-left max-w-[340px]">
+                {undoHistory.length > 0
+                  ? undoHistory.map((line) => <div key={line}>{line}</div>)
+                  : <div>Нет действий для отмены</div>}
+              </TooltipContent>
+            </Tooltip>
             {undoCount > 0 && redoCount > 0 && <span className="opacity-40">|</span>}
-            <button
-              className="flex items-center gap-0.5 hover:opacity-100 opacity-90 cursor-pointer disabled:opacity-40 disabled:cursor-default"
-              disabled={redoCount === 0}
-              onClick={() => useAppStore.getState().redo()}
-              title={`Повторить (${redoCount})`}
-              aria-label={`Повторить (${redoCount})`}
-            >
-              ↪ {redoCount}
-            </button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  className="flex items-center gap-0.5 hover:opacity-100 opacity-90 cursor-pointer disabled:opacity-40 disabled:cursor-default"
+                  disabled={redoCount === 0}
+                  onClick={() => useAppStore.getState().redo()}
+                  aria-label={`Повторить (${redoCount})`}
+                >
+                  ↪ {redoCount}
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="text-[11px] text-left max-w-[340px]">
+                {redoHistory.length > 0
+                  ? redoHistory.map((line) => <div key={line}>{line}</div>)
+                  : <div>Нет действий для повтора</div>}
+              </TooltipContent>
+            </Tooltip>
           </span>
         )}
         {clusteringResults && clusteringResults.size > 0 && (

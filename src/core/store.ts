@@ -27,7 +27,7 @@ import type { GroupSlice } from './store/groupSlice';
 import { createPhraseSlice, rebuildPhraseMap } from './store/phraseSlice';
 import type { PhraseSlice } from './store/phraseSlice';
 import type { Phrase } from './types';
-import { createMinusWordSlice } from './store/minusWordSlice';
+import { createMinusWordSlice, dedupeMinusWords } from './store/minusWordSlice';
 import type { MinusWordSlice } from './store/minusWordSlice';
 import { createSelectionSlice } from './store/selectionSlice';
 import type { SelectionSlice } from './store/selectionSlice';
@@ -84,7 +84,7 @@ export const useAppStore = create<AppStore>()(
           groups: p.groups ?? current.groups,
           phrases,
           phraseMap,
-          minusWords: p.minusWords ?? current.minusWords,
+          minusWords: dedupeMinusWords(p.minusWords ?? current.minusWords),
           minusWordGroups: p.minusWordGroups ?? current.minusWordGroups,
           ui: {
             ...current.ui,

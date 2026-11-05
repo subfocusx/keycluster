@@ -46,7 +46,7 @@ const findReplaceModule: AppModule = {
 
     ctx.registerUI({
       slot: 'ribbon:tools',
-      label: 'Найти/Зам.',
+      label: 'Найти/Заменить',
       component: () => FindReplacePanel({ ctx }),
       order: 40,
     });

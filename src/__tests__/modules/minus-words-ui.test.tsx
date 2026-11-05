@@ -161,3 +161,42 @@ describe('MinusWordsPanel', () => {
     expect(screen.getByText(/Будет перемещено в корзину: 1 фраз/)).toBeInTheDocument();
   });
 });
+
+describe('MinusWordsPanel — folders', () => {
+  let ctx: ReturnType<typeof createMockCtx>;
+
+  beforeEach(() => {
+    useAppStore.getState().clearAll();
+    ctx = createMockCtx();
+  });
+
+  it('keeps folders visible when the minus-word list is empty', () => {
+    useAppStore.getState().createMinusWordGroup('Мусор');
+    render(<MinusWordsPanel ctx={ctx as any} />);
+    expect(screen.getByText('Мусор')).toBeInTheDocument();
+  });
+
+  it('keeps a folder visible after the last word of the list is deleted', async () => {
+    const store = useAppStore.getState();
+    const folderId = store.createMinusWordGroup('Мусор');
+    store.addMinusWord('купить', false, null, 'broad', folderId);
+
+    render(<MinusWordsPanel ctx={ctx as any} />);
+    const deleteBtn = screen.getAllByRole('button').find(b =>
+      b.querySelector('.material-symbols-outlined')?.textContent === 'close' &&
+      b.className.includes('tool-btn'));
+    expect(deleteBtn).toBeTruthy();
+    await userEvent.click(deleteBtn!);
+
+    expect(useAppStore.getState().minusWords).toHaveLength(0);
+    expect(screen.getByText('Мусор')).toBeInTheDocument();
+  });
+
+  it('does not add the same minus word twice', async () => {
+    render(<MinusWordsPanel ctx={ctx as any} />);
+    const input = screen.getByPlaceholderText('Минус-фраза или слово...');
+    await userEvent.type(input, 'бесплатно{enter}');
+    await userEvent.type(input, 'бесплатно{enter}');
+    expect(useAppStore.getState().minusWords).toHaveLength(1);
+  });
+});

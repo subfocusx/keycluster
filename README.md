@@ -53,7 +53,7 @@ npm run tauri build
 | `npm run test:watch` | Тесты в watch-режиме |
 | `npm run test:coverage` | Тесты с отчётом покрытия |
 | `npm run typecheck` | TypeScript проверка |
-| `npm run lint` | ESLint |
+| `npm run lint` | ESLint (⚠️ сломан: нет `eslint.config.js`, ESLint 9 требует новый формат) |
 
 ## Архитектура
 
@@ -69,14 +69,16 @@ keycluster-tauri/
 │   └── __tests__/                # Тесты
 ├── src-tauri/                    # Бэкенд (Rust + Tauri)
 │   └── src/
-│       ├── lib.rs                # setup Tauri, плагины, команды
+│       ├── lib.rs                # setup Tauri, плагины, команды (22 invoke-команды)
 │       ├── main.rs               # точка входа
-│       ├── db.rs                 # SQLite: таблицы, индексы
+│       ├── db.rs                 # SQLite: таблицы Project, ProjectBackup
 │       ├── projects.rs           # CRUD проектов
-│       ├── backups.rs            # SHA-256 бэкапы
-│       └── commands.rs           # health_check
+│       ├── backups.rs            # SHA-256 бэкапы/снапшоты
+│       ├── commands.rs           # health_check, export_project_to_file
+│       ├── api_server.rs         # HTTP API (axum, 127.0.0.1:42001, Bearer-токен)
+│       └── http.rs               # SSRF-защищённый HTTP-клиент для плагинов
 ├── package.json
-├── tauri.conf.json
+├── src-tauri/tauri.conf.json
 ├── tsconfig.json
 ├── vite.config.ts
 └── vitest.config.ts
@@ -84,7 +86,7 @@ keycluster-tauri/
 
 ### Стек
 
-- **Ядро**: Tauri v2, Rust (rusqlite + serde + sha2)
+- **Ядро**: Tauri v2, Rust (rusqlite bundled + serde + sha2 + tokio + axum 0.7 + reqwest + chrono + uuid)
 - **Фронтенд**: React 19, TypeScript, Vite 8, Tailwind v4
 - **Состояние**: Zustand 5
 - **Импорт**: PapaParse (streaming) + xlsx
@@ -97,15 +99,19 @@ keycluster-tauri/
 ┌─────────────────────┐
 │   main.rs           │  точка входа
 ├─────────────────────┤
-│   lib.rs            │  Tauri Builder + плагины + команды
+│   lib.rs            │  Tauri Builder + плагины + 22 команды
 ├─────────────────────┤
 │   db.rs             │  SQLite (rusqlite) — Project, ProjectBackup
 ├─────────────────────┤
-│   projects.rs       │  list / get / create / update / delete
+│   projects.rs       │  list / get / create / update / delete / restore
 ├─────────────────────┤
 │   backups.rs        │  create / get / list / prune + SHA-256
 ├─────────────────────┤
-│   commands.rs       │  health_check
+│   commands.rs       │  health_check, export_project_to_file
+├─────────────────────┤
+│   api_server.rs     │  HTTP API :42001 (axum, Bearer-токен, rate-limit)
+├─────────────────────┤
+│   http.rs           │  HTTP-клиент для плагинов (SSRF-защита)
 └─────────────────────┘
 ```
 
@@ -130,17 +136,16 @@ keycluster-tauri/
 │  ├── backup-manager.ts    ── менеджер бэкапов│
 │  └── tauri-logger.ts      ── логгер в файл  │
 ├────────────────────────────────────────────┤
-│  modules/                                  │
-│  ├── clustering/    ── кластеризация       │
-│  ├── phrases/       ── фразы               │
-│  ├── groups/        ── группы              │
-│  ├── import-export/ ── импорт/экспорт      │
-│  ├── cross-search/  ── кросс-поиск         │
-│  ├── find-replace/  ── поиск и замена      │
-│  ├── minus-words/   ── минус-фразы         │
-│  ├── ngrams/        ── n-граммы            │
-│  ├── tfidf/         ── TF-IDF              │
-│  └── ...                                   │
+│  modules/                                  │  (только 3 builtin: phrases, groups, devtools)
+│  ├── phrases/         ── фразы             │
+│  ├── groups/          ── группы            │
+│  └── devtools/        ── инструменты       │
+│  (остальное — user-plugins/: clustering,   │
+│   import-export, cross-search, find-replace,│
+│   minus-words, group-analysis, ngrams,     │
+│   tfidf, deduplicator, implicit-duplicates │
+│   + ai, browser-search, favorites и др.;    │
+│   всего 13 registerBuiltin в module-loader) │
 └────────────────────────────────────────────┘
 ```
 
@@ -164,7 +169,7 @@ Rust: projects::create_project()
 db.rs (SQLite)
 ```
 
-Все общение с бэкендом — через `@tauri-apps/api/core.invoke()`. HTTP-транспорт не используется.
+Основное общение с бэкендом — через `@tauri-apps/api/core.invoke()` (22 команды: проекты, бэкапы/снапшоты, файлы, API-токен). Дополнительно поднят локальный HTTP API на `127.0.0.1:42001` (axum, `src-tauri/src/api_server.rs`, Bearer-авторизация) для внешних инструментов — см. `plugin-template/HTTP_BRIDGE_API.md`.
 
 ### Система плагинов
 
@@ -172,9 +177,8 @@ db.rs (SQLite)
 
 | Тип | Назначение | Расположение | Можно удалить? |
 |-----|-----------|-------------|----------------|
-| **builtin** | Ядро системы (неотключаемые) | `src/modules/` | нет |
-| **local** | Встроенные модули приложения | `src/plugins/` | нет |
-| **user** | Пользовательские плагины | `user-plugins/` (dev) / `appLocalDataDir/user-plugins/` (runtime) | да |
+| **builtin** | Модули ядра (3 шт: `phrases`, `groups`, `devtools` + 10 из `user-plugins/` через `registerBuiltin`, всего 13) | `src/modules/` + `user-plugins/` | нет |
+| **user** | Пользовательские плагины (16 каталогов в `user-plugins/`) | `user-plugins/` (dev) / `%APPDATA%/user-plugins` (runtime) | да |
 
 Каждый плагин — это `AppModule` с `manifest`, `init(ctx)` и `destroy()`. Жизненный цикл: установка → валидация → enable → init → destroy при disable/uninstall. Установка атомарна с откатом при ошибке.
 
@@ -189,20 +193,19 @@ db.rs (SQLite)
 
 Управление плагинами: Plugin Manager UI (в настройках) → выбор папки с плагином → атомарная установка. Настройки плагинов сохраняются в Zustand с валидацией по схеме.
 
-**Шаблоны для разработки плагинов:**
-- `plugin-template/` — базовый шаблон (см. `plugin-template/README.md` — полная документация)
-- `plugin-template-advanced/` — расширенный шаблон с кастомными вкладками настроек
+**Шаблон для разработки плагинов:**
+- `plugin-template/` — базовый шаблон (см. `plugin-template/README.md` — гайд, `plugin-template/API.md` — справочник API, `plugin-template/HTTP_BRIDGE_API.md` — HTTP API)
 
 Плагины компилируются через esbuild: `npx esbuild index.ts --bundle --format=esm --outfile=index.js --external:react --external:react-dom`.
 
 ### Состояние
 
-Zustand + Immer. Основные срезы:
+Zustand + Immer. Основные срезы (`src/core/store.ts` + `src/core/settings-store.ts`):
 - `groups` — список групп
-- `phrases` — список фраз
+- `phrases` — список фраз (+ производный `phraseMap`, перестраивается из `phrases`)
 - `minusWords` — минус-фразы
 - `ui` — состояние интерфейса (панели, тема)
-- `settings` — настройки модулей
+- настройки модулей — отдельный `settings-store` (не срез `store.ts`)
 
 ### Тестирование
 
@@ -220,7 +223,7 @@ npx vitest run src/__tests__/core/project-service-extended.test.ts
 npm run test:watch
 ```
 
-Текущее покрытие: **~72% statements**, **~73% lines** (core — 88.5%, основные модули — 70–100%).
+Историческое покрытие (2026-10, требует перепроверки через `npm run test:coverage`): **~72% statements**, **~73% lines** (core — 88.5%). См. также `TEST_COVERAGE_PLAN.md` (частично выполнен) и `src/__tests__/PERFORMANCE_REPORT.md` (нагрузка 38/38).
 
 ## Переносимая версия
 
@@ -239,17 +242,22 @@ npm run tauri build
 ## Структура данных
 
 ```sql
--- SQLite
-CREATE TABLE projects (
+-- SQLite (фактически, src-tauri/src/db.rs)
+CREATE TABLE IF NOT EXISTS Project (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
-    version TEXT NOT NULL DEFAULT '1.0',
-    data TEXT NOT NULL DEFAULT '{}',
-    phrase_count INTEGER DEFAULT 0,
-    is_backup INTEGER DEFAULT 0,
-    parent_project_id TEXT,
-    created_at TEXT NOT NULL DEFAULT (datetime('now')),
-    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    version TEXT DEFAULT '1.0',
+    data TEXT NOT NULL,              -- JSON: groups/phrases упакованы строками внутри
+    phraseCount INTEGER DEFAULT 0,
+    createdAt INTEGER NOT NULL,      -- unix ms
+    updatedAt INTEGER NOT NULL       -- unix ms
+);
+CREATE TABLE IF NOT EXISTS ProjectBackup (
+    id TEXT PRIMARY KEY,
+    parentId TEXT NOT NULL,          -- FK -> Project(id) без ON DELETE
+    data TEXT NOT NULL,              -- JSON снапшота + checksum
+    checksum TEXT NOT NULL,          -- SHA-256
+    createdAt INTEGER NOT NULL
 );
 ```
 

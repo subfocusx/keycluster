@@ -42,7 +42,7 @@ const crossSearchModule: AppModule = {
 
     ctx.registerUI({
       slot: 'ribbon:tools',
-      label: 'Перекрёстный',
+      label: 'Перекрёстный поиск',
       component: () => CrossSearchPanel({ ctx }),
       order: 30,
     });

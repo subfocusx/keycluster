@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { getRuntime } from '@/plugin-sdk';
 import { pluginRegistry } from '@/plugin-sdk';
 import { MIcon } from '@/shell/shared-icon';
+import { pluralize } from '@/core/i18n/plural';
 import { useRuntimeEvents } from '@/shell/useRuntimeEvents';
 import {
   DropdownMenu,
@@ -51,7 +52,7 @@ export function PluginRibbonButtons({ onToolOpen, activeTool }: { onToolOpen: (i
       {overflow.length > 0 && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="ribbon-btn" title={`Ещё ${overflow.length} плагинов`}>
+            <button className="ribbon-btn" title={`Ещё ${pluralize(overflow.length, 'плагин', 'плагина', 'плагинов')}`}>
               <MIcon name="more_horiz" />
             </button>
           </DropdownMenuTrigger>

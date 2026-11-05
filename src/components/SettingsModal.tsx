@@ -145,8 +145,8 @@ function GeneralSection() {
   const { setTheme: setNextTheme } = useTheme();
 
   const themes: Array<{ id: 'light' | 'dark' | 'dark-pro'; label: string; icon: string }> = [
-    { id: 'light', label: 'Light', icon: 'light_mode' },
-    { id: 'dark', label: 'Dark', icon: 'dark_mode' },
+    { id: 'light', label: 'Светлая', icon: 'light_mode' },
+    { id: 'dark', label: 'Тёмная', icon: 'dark_mode' },
     { id: 'dark-pro', label: 'Dark Pro', icon: 'contrast' },
   ];
 

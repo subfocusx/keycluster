@@ -96,7 +96,7 @@ export function MinusWordsList({
           <MIcon name={showMatched ? 'visibility_off' : 'visibility'} className="!text-[14px]" />
         </Button>
       </div>
-      {minusWords.length === 0 ? (
+      {minusWords.length === 0 && minusWordGroupsList.length === 0 ? (
         <p className="text-[12px] text-[var(--kc-text-secondary)] py-2">Нет минус-фраз</p>
       ) : (
         <div className="space-y-1">

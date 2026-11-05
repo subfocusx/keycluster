@@ -388,6 +388,21 @@ export function ImportDialog({ open, onOpenChange, ctx }: { open: boolean; onOpe
               </div>
 
               <div>
+                <label className="text-[13px] font-medium mb-1 block">Целевая группа</label>
+                <Select value={targetGroupId ?? '__none__'} onValueChange={(v) => setTargetGroupId(v === '__none__' ? null : v)}>
+                  <SelectTrigger className="w-full h-8 rounded-[3px] border border-[var(--kc-border)] bg-[var(--kc-surface)] px-3 text-[12px]" aria-label="Целевая группа">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">— Выберите группу —</SelectItem>
+                    {groups.map(g => (
+                      <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
                 <span className="text-[11px] font-medium text-[var(--kc-text-secondary)]">Предпросмотр (первые 5 строк)</span>
                 <div className="mt-1 overflow-x-auto border border-[var(--kc-border)] rounded-[3px] text-[12px]">
                   <table className="w-full">

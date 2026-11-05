@@ -7,7 +7,7 @@ import type { ModuleUIContribution } from '@/plugin-sdk';
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef, Suspense } from 'react';
-import { getRuntime } from '@/plugin-sdk';
+import { getRuntime, TOOL_REGISTRY } from '@/plugin-sdk';
 import { pluginRegistry } from '@/plugin-sdk';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { ModuleErrorBoundary } from '@/components/ModuleErrorBoundary';
@@ -95,6 +95,7 @@ export function ToolModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
+        aria-describedby={undefined}
         className="kc-dialog-content flex flex-col overflow-auto !p-0 !gap-0"
         style={{ width: size.width, height: size.height, maxWidth: 'calc(100vw - 2rem)', maxHeight: 'calc(100vh - 2rem)' }}
       >
@@ -156,6 +157,9 @@ export function PluginToolModal({ activeTool, onClose }: { activeTool: string | 
       const all = rt.getUIContributions('ribbon:tools');
       const userOnly = all.filter(c => {
         if (!c.moduleId) return false;
+        // Tools that are part of the builtin TOOL_REGISTRY are rendered by the
+        // builtin ToolModal — rendering them here would open the tool twice.
+        if (TOOL_REGISTRY[c.moduleId as keyof typeof TOOL_REGISTRY]) return false;
         const record = pluginRegistry.get(c.moduleId);
         return record?.source === 'user';
       });
@@ -220,6 +224,7 @@ export function PluginToolModal({ activeTool, onClose }: { activeTool: string | 
   return (
     <Dialog open={true} onOpenChange={(open) => { if (!open) onClose(); }}>
       <DialogContent
+        aria-describedby={undefined}
         className="kc-dialog-content flex flex-col overflow-auto !p-0 !gap-0"
         style={{ width: size.width, height: size.height, maxWidth: 'calc(100vw - 2rem)', maxHeight: 'calc(100vh - 2rem)' }}
       >

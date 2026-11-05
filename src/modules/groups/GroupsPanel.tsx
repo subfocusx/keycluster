@@ -46,7 +46,15 @@ export function GroupsPanel({ ctx }: { ctx: PluginContext }) {
   const phrases = useAppStore(s => s.phrases);
   const minusWords = useAppStore(s => s.minusWords);
   const selectedPhraseIds = useAppStore(s => s.selectedPhraseIds);
+  const groupsPanelCollapsed = useAppStore(s => s.ui.groupsPanelCollapsed) ?? false;
+  const groupsTreeOnLeft = useAppStore(s => s.ui.groupsTreeOnLeft) ?? false;
+  const setGroupsPanelCollapsed = useAppStore(s => s.setGroupsPanelCollapsed);
+  const setGroupsTreeOnLeft = useAppStore(s => s.setGroupsTreeOnLeft);
   const kcDialog = useKCDialog();
+
+  const toggleTreeOnLeft = useCallback(() => {
+    setGroupsTreeOnLeft(!groupsTreeOnLeft);
+  }, [groupsTreeOnLeft, setGroupsTreeOnLeft]);
 
   const [sortField, setSortField] = useState<GroupSortField | null>(null);
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
@@ -200,6 +208,42 @@ export function GroupsPanel({ ctx }: { ctx: PluginContext }) {
     }
   }, [multigroupMode, activeGroupId, selectedGroupIds, setMultigroupMode]);
 
+  // ---- Свёрнутая панель: узкая полоса с иконками -------------------------
+
+  if (groupsPanelCollapsed) {
+    return (
+      <div
+        className="flex flex-col items-center gap-1 h-full w-9 py-1 bg-[var(--bg-panel)]"
+        data-testid="groups-panel-collapsed"
+      >
+        <button
+          className="tool-btn !w-7 !h-7"
+          title="Развернуть панель групп"
+          aria-label="Развернуть панель групп"
+          data-testid="groups-expand-button"
+          onClick={() => setGroupsPanelCollapsed(false)}
+        >
+          <MIcon name={groupsTreeOnLeft ? 'chevron_right' : 'chevron_left'} className="!text-[16px]" />
+        </button>
+        <button
+          className="tool-btn !w-7 !h-7"
+          title={groupsTreeOnLeft ? 'Переместить дерево групп вправо' : 'Переместить дерево групп влево'}
+          aria-label="Дерево групп слева"
+          aria-pressed={groupsTreeOnLeft}
+          data-testid="groups-tree-left-button-collapsed"
+          onClick={toggleTreeOnLeft}
+        >
+          <MIcon name="swap_horiz" className="!text-[16px]" />
+        </button>
+        <MIcon
+          name="folder_special"
+          className="!text-[16px] mt-1"
+          style={{ color: 'var(--accent-orange)' }}
+        />
+      </div>
+    );
+  }
+
   const renderSubtree = (group: Group, depth: number = 0): React.ReactNode => {
     let children = groups.filter(g => g.parentId === group.id && !g.isTrash);
 
@@ -266,11 +310,11 @@ export function GroupsPanel({ ctx }: { ctx: PluginContext }) {
       )}
 
       <div className="flex items-center justify-between px-3 h-8 border-b border-[var(--border)] bg-[var(--bg-panel)] shrink-0">
-        <span className="font-label-caps text-[var(--text-secondary)] flex items-center gap-1.5">
+        <span className="font-label-caps text-[var(--text-secondary)] flex items-center gap-1.5 min-w-0 truncate">
           <MIcon name="folder_special" className="!text-[13px]" style={{ color: 'var(--accent-orange)' }} />
           Управление группами
         </span>
-        <div className="flex items-center gap-0.5">
+        <div className="flex items-center gap-0.5 shrink-0">
           <button
             className="tool-btn !w-6 !h-6"
             title="Свернуть все"
@@ -286,6 +330,25 @@ export function GroupsPanel({ ctx }: { ctx: PluginContext }) {
             onClick={() => setAllExpanded(true)}
           >
             <MIcon name="unfold_more" className="!text-[14px]" />
+          </button>
+          <button
+            className="tool-btn !w-6 !h-6"
+            title={groupsTreeOnLeft ? 'Переместить дерево групп вправо' : 'Переместить дерево групп влево'}
+            aria-label="Дерево групп слева"
+            aria-pressed={groupsTreeOnLeft}
+            data-testid="groups-tree-left-button"
+            onClick={toggleTreeOnLeft}
+          >
+            <MIcon name="swap_horiz" className="!text-[14px]" />
+          </button>
+          <button
+            className="tool-btn !w-6 !h-6"
+            title="Свернуть панель групп"
+            aria-label="Свернуть панель групп"
+            data-testid="groups-collapse-button"
+            onClick={() => setGroupsPanelCollapsed(true)}
+          >
+            <MIcon name={groupsTreeOnLeft ? 'chevron_left' : 'chevron_right'} className="!text-[14px]" />
           </button>
         </div>
       </div>

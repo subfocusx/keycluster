@@ -105,7 +105,7 @@ export function TrashModal({ open, onOpenChange, ctx }: {
               <Button variant="outline" size="sm" onClick={handleRestore} disabled={selectedIds.length === 0}
                 className="text-[var(--kc-blue)]">
                 <MIcon name="restore_from_trash" className="!text-[14px] mr-1" />
-                Восстановить ({selectedIds.length || ''})
+                Восстановить{selectedIds.length > 0 ? ` (${selectedIds.length})` : ''}
               </Button>
               <Button variant="outline" size="sm" onClick={handleRestoreAll}>
                 <MIcon name="restore_from_trash" className="!text-[14px] mr-1" />

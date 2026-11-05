@@ -45,6 +45,7 @@ function parseProjectRecord(row: any): ProjectRecord {
   const groups: any[] = safeJsonParse(dataObj.groups, []);
   const phrases: any[] = safeJsonParse(dataObj.phrases, []);
   const minusWords: any[] = safeJsonParse(dataObj.minusWords, []);
+  const minusWordGroups: any[] = safeJsonParse(dataObj.minusWordGroups, []);
   const settings: Record<string, any> = safeJsonParse(dataObj.settings, {});
   const uiState: Record<string, any> = safeJsonParse(dataObj.uiState, {});
 
@@ -55,6 +56,7 @@ function parseProjectRecord(row: any): ProjectRecord {
     groups,
     phrases,
     minusWords,
+    minusWordGroups,
     settings,
     uiState,
     isBackup: false,
@@ -88,6 +90,7 @@ export const ipcTransport: ProjectTransport = {
         phrases: params.phrases,
         phrase_count: params.phraseCount,
         minus_words: params.minusWords,
+        minus_word_groups: params.minusWordGroups,
         settings: params.settings,
         ui_state: params.uiState,
         is_backup: params.isBackup,
@@ -106,6 +109,7 @@ export const ipcTransport: ProjectTransport = {
         phrases: params.phrases,
         phrase_count: params.phraseCount,
         minus_words: params.minusWords,
+        minus_word_groups: params.minusWordGroups,
         settings: params.settings,
         ui_state: params.uiState,
       },
@@ -141,6 +145,7 @@ export const ipcTransport: ProjectTransport = {
       groups: row.data?.groups ? JSON.parse(row.data.groups) : [],
       phrases: row.data?.phrases ? JSON.parse(row.data.phrases) : [],
       minusWords: row.data?.minusWords ? JSON.parse(row.data.minusWords) : [],
+      minusWordGroups: row.data?.minusWordGroups ? JSON.parse(row.data.minusWordGroups) : [],
       settings: row.data?.settings ? JSON.parse(row.data.settings) : {},
       uiState: row.data?.uiState ? JSON.parse(row.data.uiState) : {},
       isBackup: true,

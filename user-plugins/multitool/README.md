@@ -1,5 +1,8 @@
 # KeyCluster Plugin Development Guide
 
+> ⚠️ 2026-11-05: этот файл — копия `plugin-template/README.md`, а не документация
+> multitool-плагина. Специфичного описания multitool нет.
+
 ## Содержание
 
 - [Быстрый старт](#быстрый-старт)
