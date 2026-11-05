@@ -3,10 +3,22 @@
 // ║  Плагины НЕ ДОЛЖНЫ импортировать этот файл напрямую.    ║
 // ╚══════════════════════════════════════════════════════════╝
 import { v4 as uuid } from 'uuid';
-import type { Phrase, KCID } from '../types';
+import type { Phrase, Group, KCID } from '../types';
 import { LogStore } from '../logging/LogStore';
+import { pluralize } from '../i18n/plural';
 
 type PhraseWithTrashMeta = Phrase & { _originalGroupId?: KCID };
+
+/** Название группы по id — для человекочитаемых подписей в истории изменений. */
+function groupName(groups: Group[], id: KCID | null | undefined): string {
+  if (!id) return '';
+  return groups.find((g) => g.id === id)?.name ?? '';
+}
+
+/** «Добавление 6 фраз в «Кластеры»»; без названия группы — «Добавление 6 фраз». */
+function withGroup(text: string, name: string): string {
+  return name ? `${text} в «${name}»` : text;
+}
 
 export interface PhraseSlice {
   phrases: Phrase[];
@@ -41,7 +53,11 @@ export function createPhraseSlice(set: any, get: any) {
     phrases: [] as Phrase[],
     phraseMap: new Map<KCID, number>(),
     addPhrases: (texts: string[], groupId: KCID, extra?: Partial<Phrase>[]) => {
-      get().pushUndo();
+      const targetName = groupName(get().groups, groupId);
+      get().pushUndo(withGroup(
+        `Добавление ${pluralize(texts.length, 'фразы', 'фраз', 'фраз')}`,
+        targetName,
+      ));
       const newPhrases: Phrase[] = texts.map((text, i) => ({
         id: uuid(),
         text: text.trim(),
@@ -56,7 +72,7 @@ export function createPhraseSlice(set: any, get: any) {
       LogStore._log('info', 'phrases', `${texts.length} phrases added to group ${groupId}`, { count: texts.length, groupId });
     },
     deletePhrases: (ids: KCID[]) => {
-      get().pushUndo();
+      get().pushUndo(`Удаление ${pluralize(ids.length, 'фразы', 'фраз', 'фраз')}`);
       const idSet = new Set(ids);
       LogStore._log('info', 'phrases', `${ids.length} phrases deleted`, { count: ids.length });
       set((draft: any) => {
@@ -66,7 +82,7 @@ export function createPhraseSlice(set: any, get: any) {
       });
     },
     moveToTrash: (ids: KCID[]) => {
-      get().pushUndo();
+      get().pushUndo(`Перемещение ${pluralize(ids.length, 'фразы', 'фраз', 'фраз')} в корзину`);
       const state = get();
       const existingTrash = state.groups.find((g: any) => g.isTrash);
       let trashGroupId: KCID;
@@ -100,7 +116,7 @@ export function createPhraseSlice(set: any, get: any) {
       });
     },
     restoreFromTrash: (ids: KCID[]) => {
-      get().pushUndo();
+      get().pushUndo(`Восстановление ${pluralize(ids.length, 'фразы', 'фраз', 'фраз')} из корзины`);
       const idSet = new Set(ids);
       LogStore._log('info', 'phrases', `${ids.length} phrases restored from trash`, { count: ids.length });
       set((draft: any) => {
@@ -123,7 +139,7 @@ export function createPhraseSlice(set: any, get: any) {
       const state = get();
       const trashGroup = state.groups.find((g: any) => g.isTrash);
       if (!trashGroup) return;
-      get().pushUndo();
+      get().pushUndo('Очистка корзины');
       const trashGroupId = trashGroup.id;
       LogStore._log('info', 'phrases', 'Trash cleared');
       set((draft: any) => {
@@ -132,7 +148,11 @@ export function createPhraseSlice(set: any, get: any) {
       });
     },
     movePhrases: (ids: KCID[], targetGroupId: KCID) => {
-      get().pushUndo();
+      const targetName = groupName(get().groups, targetGroupId);
+      get().pushUndo(withGroup(
+        `Перенос ${pluralize(ids.length, 'фразы', 'фраз', 'фраз')}`,
+        targetName,
+      ));
       const idSet = new Set(ids);
       LogStore._log('debug', 'phrases', `${ids.length} phrases moved to group ${targetGroupId}`, { count: ids.length, targetGroupId });
       set((draft: any) => {
@@ -142,7 +162,11 @@ export function createPhraseSlice(set: any, get: any) {
       });
     },
     copyPhrases: (ids: KCID[], targetGroupId: KCID) => {
-      get().pushUndo();
+      const targetName = groupName(get().groups, targetGroupId);
+      get().pushUndo(withGroup(
+        `Копирование ${pluralize(ids.length, 'фразы', 'фраз', 'фраз')}`,
+        targetName,
+      ));
       const idSet = new Set(ids);
       const source = get().phrases.filter((p: Phrase) => idSet.has(p.id));
       const copies: Phrase[] = source.map((p: Phrase) => ({ ...p, id: uuid(), groupId: targetGroupId, createdAt: Date.now() }));
@@ -153,7 +177,7 @@ export function createPhraseSlice(set: any, get: any) {
       LogStore._log('info', 'phrases', `${ids.length} phrases copied to group ${targetGroupId}`, { count: ids.length, targetGroupId });
     },
   updatePhrase: (id: KCID, updates: Partial<Phrase>) => {
-    get().pushUndo();
+    get().pushUndo('Редактирование фразы');
     set((draft: any) => {
       const idx = draft.phraseMap.get(id);
       if (idx !== undefined) {
@@ -179,7 +203,8 @@ export function createPhraseSlice(set: any, get: any) {
       set({ phrases, phraseMap });
     },
     togglePhraseStar: (id: KCID) => {
-      get().pushUndo();
+      const isStarred = !!get().phrases.find((p: Phrase) => p.id === id)?.starredAt;
+      get().pushUndo(isStarred ? 'Удаление фразы из избранного' : 'Добавление фразы в избранное');
       set((draft: any) => {
         const idx = draft.phraseMap.get(id);
         if (idx !== undefined) {
@@ -191,7 +216,7 @@ export function createPhraseSlice(set: any, get: any) {
       });
     },
     addTagToPhrase: (id: KCID, tag: string) => {
-      get().pushUndo();
+      get().pushUndo(`Добавление тега «${tag.trim()}»`);
       set((draft: any) => {
         const idx = draft.phraseMap.get(id);
         if (idx !== undefined) {
@@ -205,7 +230,7 @@ export function createPhraseSlice(set: any, get: any) {
       });
     },
     removeTagFromPhrase: (id: KCID, tag: string) => {
-      get().pushUndo();
+      get().pushUndo(`Удаление тега «${tag}»`);
       set((draft: any) => {
         const idx = draft.phraseMap.get(id);
         if (idx !== undefined) {
@@ -217,7 +242,7 @@ export function createPhraseSlice(set: any, get: any) {
       });
     },
     setPhraseIntent: (id: KCID, intent: 'transactional' | 'commercial' | 'informational' | 'navigational') => {
-      get().pushUndo();
+      get().pushUndo('Назначение типа поиска фразы');
       set((draft: any) => {
         const idx = draft.phraseMap.get(id);
         if (idx !== undefined) {
@@ -231,7 +256,7 @@ export function createPhraseSlice(set: any, get: any) {
       });
     },
     clearPhraseIntent: (id: KCID) => {
-      get().pushUndo();
+      get().pushUndo('Сброс типа поиска фразы');
       set((draft: any) => {
         const idx = draft.phraseMap.get(id);
         if (idx !== undefined) {

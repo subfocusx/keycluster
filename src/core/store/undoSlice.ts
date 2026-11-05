@@ -12,16 +12,24 @@ export interface UndoSnapshot {
   activeGroupId: KCID | null;
   selectedGroupIds: KCID[];
   selectedPhraseIds: KCID[];
+  /**
+   * Человекочитаемое описание отменяемого/повторяемого действия
+   * (например, «Перенос 6 фраз в “Кластеры”»).
+   * Необязательное поле: снапшоты без подписи работают как раньше.
+   */
+  label?: string;
 }
 
 export interface UndoSlice {
   undoStack: UndoSnapshot[];
   redoStack: UndoSnapshot[];
   _batchMode: boolean;
-  pushUndo: () => void;
+  /** Сохранить снимок состояния перед изменением. `label` описывает это изменение. */
+  pushUndo: (label?: string) => void;
   undo: () => void;
   redo: () => void;
-  batchOperation: (fn: () => void) => void;
+  /** Выполнить несколько изменений как одно действие в истории. */
+  batchOperation: (fn: () => void, label?: string) => void;
 }
 
 export function createUndoSlice(set: any, get: any) {
@@ -29,7 +37,7 @@ export function createUndoSlice(set: any, get: any) {
     undoStack: [] as UndoSnapshot[],
     redoStack: [] as UndoSnapshot[],
     _batchMode: false,
-    pushUndo: () => {
+    pushUndo: (label?: string) => {
       if (get()._batchMode) return;
       const s = get();
       const snapshot: UndoSnapshot = {
@@ -41,6 +49,7 @@ export function createUndoSlice(set: any, get: any) {
         activeGroupId: s.activeGroupId,
         selectedGroupIds: [...s.selectedGroupIds],
         selectedPhraseIds: [...s.selectedPhraseIds],
+        ...(label ? { label } : {}),
       };
       set((state: any) => {
         const next = [...state.undoStack, snapshot];
@@ -62,6 +71,9 @@ export function createUndoSlice(set: any, get: any) {
           activeGroupId: s.activeGroupId,
           selectedGroupIds: [...s.selectedGroupIds],
           selectedPhraseIds: [...s.selectedPhraseIds],
+          // Подпись отменённого действия переносится в redo:
+          // повтор выполнит ровно то же действие.
+          ...(snapshot.label ? { label: snapshot.label } : {}),
         };
         draft.redoStack.push(redoSnapshot);
         draft.groups = snapshot.groups;
@@ -88,6 +100,9 @@ export function createUndoSlice(set: any, get: any) {
           activeGroupId: s.activeGroupId,
           selectedGroupIds: [...s.selectedGroupIds],
           selectedPhraseIds: [...s.selectedPhraseIds],
+          // Повторённое действие сохраняет подпись — следующая отмена
+          // покажет то же самое действие.
+          ...(snapshot.label ? { label: snapshot.label } : {}),
         };
         draft.undoStack.push(undoSnapshot);
         draft.groups = snapshot.groups;
@@ -100,8 +115,8 @@ export function createUndoSlice(set: any, get: any) {
         draft.selectedPhraseIds = new Set(snapshot.selectedPhraseIds);
       });
     },
-    batchOperation: (fn: () => void) => {
-      get().pushUndo();
+    batchOperation: (fn: () => void, label?: string) => {
+      get().pushUndo(label);
       set((draft: any) => { draft._batchMode = true; });
       try {
         fn();
