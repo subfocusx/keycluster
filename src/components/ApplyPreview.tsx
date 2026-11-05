@@ -47,6 +47,7 @@ export interface ApplyPreviewItem {
 /** Счётчик в сводке «что изменится». */
 export interface ApplyPreviewCounter {
   label: string;
+  /** Число или готовая строка («17 фраз») — выводится как есть. */
   value: number | string;
 }
 

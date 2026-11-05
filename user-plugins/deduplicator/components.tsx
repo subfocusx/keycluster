@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { useAppStore, Button, Label, Checkbox, pluralize } from 'plugin-sdk';
+import { useAppStore, Button, Label, Checkbox, plural, pluralize } from 'plugin-sdk';
 import type { PluginContext } from 'plugin-sdk';
 import { ApplyPreview } from '@/components/ApplyPreview';
 import type { ApplyPreviewItem } from '@/components/ApplyPreview';
@@ -92,9 +92,9 @@ export function DeduplicatorPanel({ ctx }: { ctx: PluginContext }) {
           title="Предпросмотр дедупликации"
           summary={`Будет удалено ${pluralize(preview.length, 'дубль', 'дубля', 'дублей')}. Проверьте список перед применением.`}
           counters={[
-            { label: 'Будет удалено', value: preview.length },
-            { label: 'Останется фраз', value: phrases.length - preview.length },
-            { label: 'Групп затронуто', value: affectedGroups },
+            { label: 'Будет удалено', value: `${preview.length} ${plural(preview.length, 'дубль', 'дубля', 'дублей')}` },
+            { label: 'Останется', value: `${phrases.length - preview.length} ${plural(phrases.length - preview.length, 'фраза', 'фразы', 'фраз')}` },
+            { label: 'Групп затронуто', value: `${affectedGroups} ${plural(affectedGroups, 'группа', 'группы', 'групп')}` },
           ]}
           items={previewItems}
           totalCount={preview.length}

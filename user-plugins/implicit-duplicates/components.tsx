@@ -4,7 +4,7 @@
 
 import type { PluginContext } from 'plugin-sdk';
 import React, { useState, useCallback, useMemo } from 'react';
-import { useAppStore, Button, Badge, Checkbox, Label, Slider, ScrollArea } from 'plugin-sdk';
+import { useAppStore, Button, Badge, Checkbox, Label, Slider, ScrollArea, plural } from 'plugin-sdk';
 import { ApplyPreview } from '@/components/ApplyPreview';
 import type { ApplyPreviewItem } from '@/components/ApplyPreview';
 import type { ImplicitDuplicateGroup, FindDuplicatesOptions } from './utils';
@@ -303,7 +303,7 @@ export function ImplicitDuplicatesPanel(_props?: { ctx?: PluginContext }) {
 
     setPreview({
       title: 'Предпросмотр удаления дублей группы',
-      summary: `Будет перемещено в корзину ${duplicateIds.length} дублей, останется главная фраза «${group?.mainPhrase.text ?? ''}».`,
+      summary: `Будет перемещено в корзину ${duplicateIds.length} ${plural(duplicateIds.length, 'дубль', 'дубля', 'дублей')}, останется главная фраза «${group?.mainPhrase.text ?? ''}».`,
       items: duplicateIds.map(id => ({
         id,
         text: texts.get(id) ?? id,
@@ -398,8 +398,8 @@ export function ImplicitDuplicatesPanel(_props?: { ctx?: PluginContext }) {
               title={preview.title}
               summary={preview.summary}
               counters={[
-                { label: 'Будет удалено', value: preview.ids.length },
-                { label: 'Затронуто групп', value: affectedGroupCount },
+                { label: 'Будет удалено', value: `${preview.ids.length} ${plural(preview.ids.length, 'дубль', 'дубля', 'дублей')}` },
+                { label: 'Затронуто групп', value: `${affectedGroupCount} ${plural(affectedGroupCount, 'группа', 'группы', 'групп')}` },
               ]}
               items={preview.items}
               totalCount={preview.ids.length}
