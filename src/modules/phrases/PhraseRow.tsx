@@ -9,6 +9,16 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import type { Phrase, MinusWord, Group, KCID, PluginContext, ModuleUIContribution, PhraseActionContext } from '@/plugin-sdk';
 import { getRuntime } from '@/plugin-sdk';
 import {
+  beginDrag,
+  createDragImage,
+  endDrag,
+  getDragPayload,
+  setDragImageSafe,
+  subscribeDrag,
+  writePayload,
+} from '@/core/dnd/groupDnd';
+import type { DragPayload } from '@/core/dnd/groupDnd';
+import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
@@ -99,11 +109,38 @@ function VirtualizedRows({
     if (rt) setPhraseMenuContribs(rt.getUIContributions('context-menu:phrase'));
   }, []);
 
+  // ---- Drag & drop: строка таблицы — источник переноса фразы в группу ----
+
+  /** Активный перенос (нужен, чтобы удерживать строку-источник в DOM при прокрутке). */
+  const dragPayload = React.useSyncExternalStore(subscribeDrag, getDragPayload, getDragPayload);
+  /** Как начался перенос: 'handle' — за ручку, 'text' — по тексту (выделение текста). */
+  const dragIntentRef = React.useRef<Map<KCID, 'handle' | 'text'>>(new Map());
+
+  const draggedRowIndex = React.useMemo(() => {
+    if (!dragPayload || dragPayload.kind !== 'phrase') return -1;
+    return sortedPhrases.findIndex(p => p.id === dragPayload.sourceId);
+  }, [dragPayload, sortedPhrases]);
+
+  /**
+   * Держим строку-источник смонтированной, даже если она ушла из видимой
+   * области при прокрутке — иначе браузер прерывает перенос.
+   */
+  const rangeExtractor = React.useCallback((range: { startIndex: number; endIndex: number }) => {
+    const indices: number[] = [];
+    for (let i = range.startIndex; i <= range.endIndex; i++) indices.push(i);
+    if (draggedRowIndex >= 0 && draggedRowIndex < sortedPhrases.length && !indices.includes(draggedRowIndex)) {
+      indices.push(draggedRowIndex);
+      indices.sort((a, b) => a - b);
+    }
+    return indices;
+  }, [draggedRowIndex, sortedPhrases.length]);
+
   const rowVirtualizer = useVirtualizer({
     count: sortedPhrases.length,
     getScrollElement: () => tableContainerRef.current,
     estimateSize: () => ROW_HEIGHT,
     overscan: OVERSCAN,
+    rangeExtractor,
   });
 
   const virtualItems = rowVirtualizer.getVirtualItems();
@@ -127,7 +164,7 @@ function VirtualizedRows({
           <ContextMenu key={phrase.id}>
             <ContextMenuTrigger asChild>
               <tr
-                className={`border-b border-[var(--kc-border-light)] cursor-pointer transition-colors ${rowClass}`}
+                className={`group border-b border-[var(--kc-border-light)] cursor-pointer transition-colors ${rowClass}`}
                 style={{
                   position: 'absolute',
                   top: 0,
@@ -135,6 +172,38 @@ function VirtualizedRows({
                   width: '100%',
                   height: `${virtualRow.size}px`,
                   transform: `translateY(${virtualRow.start}px)`,
+                }}
+                draggable
+                onMouseDown={() => {
+                  dragIntentRef.current.set(phrase.id, 'text');
+                }}
+                onMouseUp={() => {
+                  // если перенос не начался — убираем отметку, чтобы не копить состояние
+                  dragIntentRef.current.delete(phrase.id);
+                }}
+                onDragStart={(e) => {
+                  const intent = dragIntentRef.current.get(phrase.id) ?? 'unknown';
+                  if (intent === 'text') {
+                    // Перенос не начинаем — пользователь выделяет текст в строке.
+                    e.preventDefault();
+                    return;
+                  }
+                  const ids = selectedPhraseIdSet.has(phrase.id) && selectedPhraseIdSet.size > 1
+                    ? [...selectedPhraseIdSet]
+                    : [phrase.id];
+                  const payload: DragPayload = {
+                    kind: 'phrase',
+                    phraseIds: ids,
+                    sourceId: phrase.id,
+                    label: phrase.text,
+                  };
+                  writePayload(e.dataTransfer, payload);
+                  beginDrag(payload);
+                  setDragImageSafe(e.dataTransfer, createDragImage(phrase.text, 'phrase'));
+                }}
+                onDragEnd={() => {
+                  dragIntentRef.current.delete(phrase.id);
+                  endDrag();
                 }}
                 onClick={(e) => handlePhraseClick(phrase, e, lastClickedPhraseId, setLastClickedPhraseId)}
                 onDoubleClick={() => onStartEdit(phrase.id, phrase.text)}
@@ -175,12 +244,40 @@ function VirtualizedRows({
                       </td>
                     );
                   }
+                  const textCellStyle: React.CSSProperties = c.key === 'text'
+                    ? { position: 'relative', paddingLeft: '18px' }
+                    : {};
                   return (
                     <td
                       key={c.key}
                       className={`${getCellClass(c.key)} col-separator-left`}
-                      style={{ ...getCellStyle(c.key, phrase), width: c.width }}
+                      style={{ ...getCellStyle(c.key, phrase), width: c.width, ...textCellStyle }}
                     >
+                      {c.key === 'text' && (
+                        <span
+                          data-drag-handle="true"
+                          data-testid="phrase-drag-handle"
+                          title="Перетащить фразу в группу"
+                          aria-label="Перетащить фразу в группу"
+                          className="absolute opacity-0 group-hover:opacity-100 transition-opacity cursor-grab"
+                          style={{
+                            left: 2,
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            width: 12,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                          onMouseDown={(e) => {
+                            e.stopPropagation();
+                            dragIntentRef.current.set(phrase.id, 'handle');
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <MIcon name="drag_indicator" className="!text-[12px]" />
+                        </span>
+                      )}
                       {renderCellValue(c.key, phrase)}
                     </td>
                   );
